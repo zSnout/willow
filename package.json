@@ -4,11 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -b",
+    "dev": "tsc -w",
+    "serve": "esbuild --servedir=./dist --bundle"
   },
   "author": "",
   "license": "GPL-3.0",
   "devDependencies": {
+    "esbuild": "^0.15.7",
     "prettier": "^2.7.1",
     "typescript": "^4.8.3"
   }
