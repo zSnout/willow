@@ -8,6 +8,6 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "./jsx-runtime.js"
+    "jsxImportSource": "."
   }
 }
