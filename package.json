@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc -w",
-    "serve": "esbuild --servedir=./dist --bundle"
+    "serve": "esbuild --servedir=./dist"
   },
   "author": "",
   "license": "GPL-3.0",
