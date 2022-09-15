@@ -1,4 +1,4 @@
-import { createEffect } from "./core";
+import { createEffect } from "./core.js";
 
 function element(tag: string) {
   return document.createElement(tag);
@@ -46,7 +46,7 @@ export interface JsxProps {
 
 export function h(
   tag: string | JSX.FC,
-  props: JsxProps,
+  props?: JsxProps | null,
   ...children: unknown[]
 ) {
   if (typeof tag === "string") {
@@ -55,7 +55,9 @@ export function h(
 
     return el;
   } else if (typeof tag === "function") {
-    if (!props.children) {
+    if (!props) {
+      props = { children };
+    } else if (!props.children) {
       props = { ...props, children };
     }
 
