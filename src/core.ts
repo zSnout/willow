@@ -25,6 +25,11 @@ export class EffectScope {
 
   activate() {
     const parentScope = currentScope;
+
+    if (parentScope) {
+      parentScope.onCleanup.add(() => this.cleanup());
+    }
+
     currentScope = this;
 
     return () => {
