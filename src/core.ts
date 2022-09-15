@@ -44,7 +44,9 @@ export function isSignal(value: unknown): value is Read<unknown> {
   return typeof value === "function";
 }
 
-export function createSignal<T>(value: T): Signal<T> {
+export function createSignal<T = any>(): Signal<T | undefined>;
+export function createSignal<T>(value: T): Signal<T>;
+export function createSignal<T>(value?: T): Signal<T> {
   const tracking = new Set<EffectScope>();
 
   const signal: Signal<T> = (() => {
