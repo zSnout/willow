@@ -5,9 +5,11 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "outDir": "./dist",
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "allowSyntheticDefaultImports": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "."
+    "jsx": "react",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "h.f",
+    "rootDir": "./src"
   }
 }
