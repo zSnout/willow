@@ -1,10 +1,12 @@
-export type Read<T> = () => T;
+export type Read<T> = (() => T) & { write?: Write<T> };
+
+export type MaybeRead<T> = T | Read<T>;
 
 export type Write<T> = (value: T) => void;
 
-export type Effect = () => void;
+export type Signal<T> = Read<T> & { write: Write<T> };
 
-export type Store<T> = [Read<T>, Write<T>];
+export type Effect = () => void;
 
 let currentScope: EffectScope | undefined;
 
@@ -38,10 +40,10 @@ export class EffectScope {
   }
 }
 
-export function createSignal<T>(value: T): Store<T> {
+export function createSignal<T>(value: T): Signal<T> {
   const tracking = new Set<EffectScope>();
 
-  const read: Read<T> = () => {
+  const signal: Signal<T> = (() => {
     const scope = currentScope;
 
     if (scope) {
@@ -50,14 +52,18 @@ export function createSignal<T>(value: T): Store<T> {
     }
 
     return value;
-  };
+  }) as any;
 
-  const write: Write<T> = (val: T) => {
+  signal.write = (val: T) => {
     value = val;
     tracking.forEach((scope) => scope.effect());
   };
 
-  return [read, write];
+  return signal;
+}
+
+export function createRead<T>(signal: Read<T>) {
+  return () => signal();
 }
 
 export function createEffect(effect: Effect): void {
@@ -68,11 +74,11 @@ export function createEffect(effect: Effect): void {
 }
 
 export function createMemo<T>(update: Read<T>): Read<T> {
-  const scope = new EffectScope(() => write(update()));
+  const scope = new EffectScope(() => signal.write(update()));
   const deactivate = scope.activate();
-  const [read, write] = createSignal<T>(update());
+  const signal = createSignal<T>(update());
   deactivate();
-  return read;
+  return signal;
 }
 
 export function untrack<T>(read: Read<T>) {
