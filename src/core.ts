@@ -93,7 +93,7 @@ export function createReadable<T>(value: T, executor: Executor<T>) {
   return readOnly(signal);
 }
 
-export function untrack<T>(read: Read<T>) {
+export function get<T>(read: Read<T>) {
   const parentScope = currentScope;
   currentScope = undefined;
   const value = read();
