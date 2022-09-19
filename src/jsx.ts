@@ -322,7 +322,7 @@ export abstract class WillowElement<T extends JSX.Props = JSX.Props> {
     };
   }
 
-  node: Node;
+  node: ChildNode;
 
   private [propsSymbol]!: T;
 

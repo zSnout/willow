@@ -11,7 +11,7 @@ declare global {
   namespace JSX {
     type MaybeAccessors<T> = { [K in keyof T]: ValueOrAccessor<T[K]> };
 
-    interface Element extends Node {}
+    interface Element extends ChildNode {}
 
     interface ElementChildrenAttribute {
       children: {};
