@@ -85,6 +85,12 @@ export function createMemo<T>(update: Accessor<T>): Accessor<T> {
   return get;
 }
 
+export function createComputed<T>(value: T, update: (oldValue: T) => T) {
+  const [get, set] = createSignal<T>(0 as any);
+  createEffect(() => set((value = update(value))));
+  return get;
+}
+
 export function untrack<T>(accessor: Accessor<T>): T {
   const parentScope = currentScope;
   currentScope = undefined;
