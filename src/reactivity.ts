@@ -80,18 +80,6 @@ export function createMemo<T>(update: Accessor<T>): Accessor<T> {
   return () => signal();
 }
 
-export function createReadable<T>(value: Signal<T>): Accessor<T>;
-export function createReadable<T>(value: T, executor: Executor<T>): Accessor<T>;
-export function createReadable<T>(value: T, executor?: Executor<T>) {
-  if (!executor) {
-    return () => (value as any)();
-  }
-
-  const signal = createSignal<T>(value);
-  executor(signal);
-  return () => signal();
-}
-
 export function get<T>(read: Accessor<T>) {
   const parentScope = currentScope;
   currentScope = undefined;
