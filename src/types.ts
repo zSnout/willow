@@ -219,7 +219,7 @@ declare global {
       | boolean
       | Node
       | Child[]
-      | (() => Child)
+      | (() => unknown)
       | null
       | undefined;
 
