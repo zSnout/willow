@@ -1,10 +1,10 @@
 import { StandardProperties } from "csstype";
 import {
   createEffect,
-  untrack,
   isAccessor,
-  Signal,
   Setter,
+  Signal,
+  untrack,
 } from "./reactivity.js";
 
 namespace Bindable {
@@ -117,14 +117,6 @@ function element(tag: string) {
 
 function append(parent: Node, child: Node) {
   parent.appendChild(child);
-}
-
-function remove(parent: Node, child: Node) {
-  parent.removeChild(child);
-}
-
-function empty(node: Node) {
-  node.childNodes.forEach((child) => remove(node, child));
 }
 
 function listen(
