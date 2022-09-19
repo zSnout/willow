@@ -1,5 +1,46 @@
-import { Bindable } from "./bindable.js";
-import { createEffect, isAccessor, Signal } from "./reactivity.js";
+import { createEffect, get, isAccessor, Signal } from "./reactivity.js";
+
+namespace Bindable {
+  export function value(signal: Signal<string>) {
+    return (el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) => {
+      el.value = get(signal);
+      listen(el, "input", () => signal.set(el.value));
+    };
+  }
+
+  export function numeric(signal: Signal<number>) {
+    return (el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) => {
+      el.value = "" + +get(signal);
+      listen(el, "input", () => signal.set(+el.value));
+    };
+  }
+
+  type InferElementRequirement<T> = T extends (
+    value: any
+  ) => (el: infer ElementType) => void
+    ? ElementType
+    : never;
+
+  type InferValueRequirement<T> = T extends (
+    value: infer ValueType
+  ) => (el: any) => void
+    ? ValueType extends Signal<infer SignalType>
+      ? Signal<SignalType>
+      : ValueType
+    : never;
+
+  export type For<T extends HTMLElement> = {
+    [K in keyof typeof Bindable as T extends InferElementRequirement<
+      typeof Bindable[K]
+    >
+      ? `bind:${K}`
+      : never]?: InferValueRequirement<typeof Bindable[K]>;
+  };
+}
+
+function isArray(value: unknown): value is any[] {
+  return Array.isArray(value);
+}
 
 function element(tag: string) {
   return document.createElement(tag);
@@ -13,19 +54,14 @@ function remove(parent: Node, child: Node) {
   parent.removeChild(child);
 }
 
-function listen(
-  node: Node,
-  type: string,
-  callback: (event: Event) => void
-): () => void {
+function listen(node: Node, type: string, callback: (event: Event) => void) {
   node.addEventListener(type, callback);
-  return () => node.removeEventListener(type, callback);
 }
 
 function text(data: unknown) {
   const node = document.createTextNode("");
 
-  if (typeof data === "function") {
+  if (isAccessor(data)) {
     createEffect(() => setData(node, data()));
   } else {
     setData(node, data);
@@ -47,7 +83,7 @@ function isNode(value: unknown): value is Node {
 }
 
 function appendAll(parent: Node, children: unknown) {
-  if (Array.isArray(children)) {
+  if (isArray(children)) {
     for (const child of children) {
       if (isNode(child)) {
         append(parent, child);
@@ -70,7 +106,7 @@ function fromClassLike(value: unknown): string {
     return value;
   }
 
-  if (Array.isArray(value)) {
+  if (isArray(value)) {
     return value.map(fromClassLike).join(" ");
   }
 
@@ -106,9 +142,11 @@ export function h(
         if (isAccessor(value)) {
           value.set?.(el);
         }
-      } else if (key === "use" || key.startsWith("use:")) {
+      } else if (key === "use") {
         if (typeof value === "function") {
           value(el);
+        } else if (isArray(value)) {
+          value.forEach((fn) => fn(el));
         }
       } else if (key.startsWith("bind:")) {
         (Bindable as any)[key.slice(5)](value)(el);
@@ -133,10 +171,14 @@ export function h(
 
     return el;
   } else if (typeof tag === "function") {
-    if (!props) {
-      props = { children };
-    } else if (!props.children) {
-      props = { ...props, children };
+    const actualChildren = children.length === 1 ? children[0] : children;
+
+    if (children.length) {
+      if (!props) {
+        props = { children: actualChildren };
+      } else if (!props.children) {
+        props = { ...props, children: actualChildren };
+      }
     }
 
     let value: JSX.Element | JSX.ElementClass;
@@ -183,14 +225,16 @@ export abstract class WillowElement<T extends JSX.Props = JSX.Props> {
   node: Node;
 
   private [propsSymbol]!: T;
-  private listeners = new Map<string, ((data?: any) => void) | undefined>();
+
+  /** listeners */
+  private l: Record<string, ((data?: any) => void) | undefined> = {};
 
   constructor(props: T) {
     props = { ...props };
 
     for (const key in props) {
       if (key.startsWith("on:")) {
-        this.listeners.set(key.slice(3), props[key]);
+        this.l[key.slice(3)] = props[key];
       }
     }
 
@@ -201,8 +245,7 @@ export abstract class WillowElement<T extends JSX.Props = JSX.Props> {
     type: K extends `on:${infer T}` ? T : never,
     ...data: Parameters<T[K]>
   ) {
-    const callback = this.listeners.get(type);
-    callback?.(...data);
+    this.l[type]?.(...data);
   }
 
   abstract render(props: T): JSX.Element;
@@ -217,7 +260,7 @@ type ElementProps<T extends HTMLElement> = {
   [K in keyof HTMLElementEventMap as `on:${K}`]?: (
     event: HTMLElementEventMap[K]
   ) => void;
-} & Bindable<T>;
+} & Bindable.For<T>;
 
 declare global {
   namespace JSX {
