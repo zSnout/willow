@@ -1,10 +1,7 @@
 export type Accessor<T> = (() => T) & { set?: Setter<T> };
 export type Setter<T> = (value: T) => void;
-
 export type ValueOrAccessor<T> = T | Accessor<T>;
-
 export type Signal<T> = Accessor<T> & { set: Setter<T> };
-export type SplitSignal<T> = [get: Accessor<T>, set: Setter<T>];
 
 export type Effect = () => void;
 
