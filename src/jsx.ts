@@ -1,17 +1,24 @@
-import { createEffect, get, isAccessor, Signal } from "./reactivity.js";
+import { StandardProperties } from "csstype";
+import {
+  createEffect,
+  untrack,
+  isAccessor,
+  Signal,
+  Setter,
+} from "./reactivity.js";
 
 namespace Bindable {
-  export function value(signal: Signal<string>) {
+  export function value([get, set]: Signal<string>) {
     return (el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) => {
-      el.value = get(signal);
-      listen(el, "input", () => signal.set(el.value));
+      el.value = get();
+      listen(el, "input", () => set(el.value));
     };
   }
 
-  export function numeric(signal: Signal<number>) {
+  export function numeric([get, set]: Signal<number>) {
     return (el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) => {
-      el.value = "" + +get(signal);
-      listen(el, "input", () => signal.set(+el.value));
+      el.value = "" + Number(untrack(get));
+      listen(el, "input", () => set(+el.value));
     };
   }
 
@@ -29,7 +36,7 @@ namespace Bindable {
       : ValueType
     : never;
 
-  export type For<T extends HTMLElement> = {
+  export type For<T> = {
     [K in keyof typeof Bindable as T extends InferElementRequirement<
       typeof Bindable[K]
     >
@@ -42,7 +49,69 @@ function isArray(value: unknown): value is any[] {
   return Array.isArray(value);
 }
 
+const svgElements = [
+  "svg",
+  "animate",
+  "animateTransform",
+  "circle",
+  "clipPath",
+  "defs",
+  "desc",
+  "ellipse",
+  "feBlend",
+  "feColorMatrix",
+  "feComponentTransfer",
+  "feComposite",
+  "feConvolveMatrix",
+  "feDiffuseLighting",
+  "feDisplacementMap",
+  "feDistantLight",
+  "feFlood",
+  "feFuncA",
+  "feFuncB",
+  "feFuncG",
+  "feFuncR",
+  "feGaussianBlur",
+  "feImage",
+  "feMerge",
+  "feMergeNode",
+  "feMorphology",
+  "feOffset",
+  "fePointLight",
+  "feSpecularLighting",
+  "feSpotLight",
+  "feTile",
+  "feTurbulence",
+  "filter",
+  "foreignObject",
+  "g",
+  "image",
+  "line",
+  "linearGradient",
+  "marker",
+  "mask",
+  "metadata",
+  "path",
+  "pattern",
+  "polygon",
+  "polyline",
+  "radialGradient",
+  "rect",
+  "stop",
+  "switch",
+  "symbol",
+  "text",
+  "textPath",
+  "tspan",
+  "use",
+  "view",
+];
+
 function element(tag: string) {
+  if (svgElements.includes(tag)) {
+    return document.createElementNS("http://www.w3.org/2000/svg", tag);
+  }
+
   return document.createElement(tag);
 }
 
@@ -54,43 +123,47 @@ function remove(parent: Node, child: Node) {
   parent.removeChild(child);
 }
 
-function listen(node: Node, type: string, callback: (event: Event) => void) {
-  node.addEventListener(type, callback);
+function empty(node: Node) {
+  node.childNodes.forEach((child) => remove(node, child));
+}
+
+function listen(
+  node: Node,
+  type: string,
+  callback: (event: Event) => void,
+  capture = false
+) {
+  node.addEventListener(type, callback, capture);
 }
 
 function text(data: unknown) {
-  const node = document.createTextNode("");
-
-  if (isAccessor(data)) {
-    createEffect(() => setData(node, data()));
-  } else {
-    setData(node, data);
-  }
-
-  return node;
+  return document.createTextNode("" + data);
 }
 
 function attr(node: Element, key: string, value: unknown) {
   node.setAttribute(key, "" + value);
 }
 
-function setData(node: CharacterData, data: unknown) {
-  node.data = String(data);
-}
-
 function isNode(value: unknown): value is Node {
   return value instanceof Node;
 }
 
-function appendAll(parent: Node, children: unknown) {
+function fragment() {
+  return document.createDocumentFragment();
+}
+
+function appendAll(parent: Node, children: JSX.Child) {
   if (isArray(children)) {
-    for (const child of children) {
-      if (isNode(child)) {
-        append(parent, child);
-      } else {
-        append(parent, text(child));
-      }
-    }
+    children.forEach((child) => appendAll(parent, child));
+  } else if (isAccessor(children)) {
+    const node = text("");
+    createEffect(() => (node.data = "" + children()));
+
+    append(parent, node);
+  } else if (isNode(children)) {
+    append(parent, children);
+  } else {
+    append(parent, text(children));
   }
 }
 
@@ -120,6 +193,29 @@ function fromClassLike(value: unknown): string {
   return "";
 }
 
+type StyleValue = StandardProperties | string | (() => StyleValue);
+
+function setStyles(
+  element: Element & ElementCSSInlineStyle,
+  value: StyleValue
+) {
+  if (isAccessor(value)) {
+    createEffect(() => setStyles(element, value()));
+  } else if (typeof value === "string") {
+    element.setAttribute("style", value);
+  } else if (typeof value === "object") {
+    for (const key in value) {
+      const val = (value as any)[key];
+
+      if (isAccessor(val)) {
+        createEffect(() => ((element.style as any)[key] = val()));
+      } else {
+        (element.style as any)[key] = val;
+      }
+    }
+  }
+}
+
 export function h(
   tag: string | JSX.FC<JSX.Props> | JSX.CC<JSX.Props>,
   props?: JSX.Props | null,
@@ -127,32 +223,36 @@ export function h(
 ): JSX.Element {
   if (typeof tag === "string") {
     const el = element(tag);
-    appendAll(el, children);
+    appendAll(el, children as JSX.Child);
 
     for (const key in props) {
       const value = props[key];
 
-      if (key === "class") {
+      if (
+        el instanceof HTMLElement &&
+        (key === "class" || key === "className")
+      ) {
         if (isAccessor(value)) {
           createEffect(() => (el.className = fromClassLike(value() as any)));
         } else {
           el.className = fromClassLike(value);
         }
-      } else if (key === "ref") {
-        if (isAccessor(value)) {
-          value.set?.(el);
-        }
-      } else if (key === "use") {
+      } else if (key === "classList") {
+      } else if (key === "ref" || key === "use") {
         if (typeof value === "function") {
           value(el);
-        } else if (isArray(value)) {
-          value.forEach((fn) => fn(el));
         }
+      } else if (key === "style") {
+        setStyles(el, value);
       } else if (key.startsWith("bind:")) {
         (Bindable as any)[key.slice(5)](value)(el);
       } else if (key.startsWith("on:")) {
         if (typeof value === "function") {
           listen(el, key.slice(3), value as any);
+        }
+      } else if (key.startsWith("oncapture:")) {
+        if (typeof value === "function") {
+          listen(el, key.slice(10), value as any, true);
         }
       } else if (key.includes("-")) {
         if (isAccessor(value)) {
@@ -202,10 +302,10 @@ export function h(
 
 export namespace h {
   export function f({ children }: JSX.Props) {
-    const fragment = document.createDocumentFragment();
-    appendAll(fragment, children);
+    const frag = fragment();
+    appendAll(frag, children);
 
-    return fragment;
+    return frag;
   }
 }
 
@@ -251,20 +351,9 @@ export abstract class WillowElement<T extends JSX.Props = JSX.Props> {
   abstract render(props: T): JSX.Element;
 }
 
-type ElementProps<T extends HTMLElement> = {
-  children?: any;
-  class?: ClassLike;
-  ref?: Signal<T>;
-  use?: ((el: T) => void) | ((el: T) => void)[];
-} & {
-  [K in keyof HTMLElementEventMap as `on:${K}`]?: (
-    event: HTMLElementEventMap[K]
-  ) => void;
-} & Bindable.For<T>;
-
 declare global {
   namespace JSX {
-    interface Element extends Node {}
+    type BindableFor<T> = Bindable.For<T>;
 
     type ElementClass = Element | WillowElement<Props>;
 
@@ -273,14 +362,9 @@ declare global {
       [bindable: `bind:${string}`]: Signal<any>;
       [event: `on:${string}`]: ((value: any) => void) | (() => void);
       children?: any;
-      use?: ((node: Node) => void) | ((node: Node) => void)[];
+      ref?: Setter<Node>;
+      use?: (node: Node) => void;
     }
-
-    export type IntrinsicElements = {
-      [K in keyof HTMLElementTagNameMap]: ElementProps<
-        HTMLElementTagNameMap[K]
-      >;
-    };
 
     export interface ElementAttributesProperty {
       [propsSymbol]: {};
@@ -292,12 +376,5 @@ declare global {
 
     type FC<T extends Props> = (props: T) => Element;
     type CC<T extends Props> = typeof WillowElement<T>;
-
-    interface IntrinsicAttributes {}
-
-    interface IntrinsicClassAttributes extends IntrinsicAttributes {
-      ref?: Signal<Node>;
-      use?: ((node: Node) => void) | ((node: Node) => void)[];
-    }
   }
 }
