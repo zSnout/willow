@@ -43,7 +43,12 @@ export function isAccessor(value: unknown): value is Accessor<any> {
 }
 
 export function isSignal(value: unknown): value is Signal<any> {
-  return isAccessor(value) && "set" in value;
+  return (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    typeof value[0] === "function" &&
+    typeof value[1] === "function"
+  );
 }
 
 export function createSignal<T = any>(): Signal<T | undefined>;
@@ -70,7 +75,7 @@ export function createSignal<T>(value?: T): Signal<T> {
   return [get, set];
 }
 
-export function createEffect(effect: Effect): void {
+export function createEffect(effect: Effect) {
   new EffectScope(effect);
 }
 
@@ -80,7 +85,7 @@ export function createMemo<T>(update: Accessor<T>): Accessor<T> {
   return get;
 }
 
-export function untrack<T>(accessor: Accessor<T>) {
+export function untrack<T>(accessor: Accessor<T>): T {
   const parentScope = currentScope;
   currentScope = undefined;
   const value = accessor();
