@@ -106,3 +106,34 @@ export function unref<T>(accessor: ValueOrAccessor<T>): T {
     return accessor;
   }
 }
+
+export function createReactive<T extends object>(object: T): T {
+  const tracking = new Set<EffectScope>();
+
+  return new Proxy<T>(object, {
+    get(...args) {
+      const scope = currentScope;
+
+      if (scope) {
+        scope.onCleanup.add(() => tracking.delete(scope));
+        tracking.add(scope);
+      }
+
+      const value = Reflect.get(...args);
+
+      // Functions are intentionally non-reactive.
+      if (typeof value === "object") {
+        return createReactive(value);
+      } else {
+        return value;
+      }
+    },
+    set(...args) {
+      const result = Reflect.set(...args);
+
+      tracking.forEach((scope) => scope.run());
+
+      return result;
+    },
+  });
+}
