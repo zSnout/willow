@@ -92,3 +92,11 @@ export function untrack<T>(accessor: Accessor<T>): T {
   currentScope = parentScope;
   return value;
 }
+
+export function unref<T>(accessor: ValueOrAccessor<T>): T {
+  if (isAccessor(accessor)) {
+    return accessor();
+  } else {
+    return accessor;
+  }
+}
