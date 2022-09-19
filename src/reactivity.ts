@@ -1,7 +1,7 @@
-export type Accessor<T> = (() => T) & { set?: Setter<T> };
+export type Accessor<T> = () => T;
 export type Setter<T> = (value: T) => void;
 export type ValueOrAccessor<T> = T | Accessor<T>;
-export type Signal<T> = Accessor<T> & { set: Setter<T> };
+export type Signal<T> = [get: Accessor<T>, set: Setter<T>];
 
 export type Effect = () => void;
 
@@ -51,7 +51,7 @@ export function createSignal<T>(value: T): Signal<T>;
 export function createSignal<T>(value?: T): Signal<T> {
   const tracking = new Set<EffectScope>();
 
-  const signal: Signal<T> = (() => {
+  const get: Accessor<T> = () => {
     const scope = currentScope;
 
     if (scope) {
@@ -59,15 +59,15 @@ export function createSignal<T>(value?: T): Signal<T> {
       tracking.add(scope);
     }
 
-    return value;
-  }) as any;
+    return value!;
+  };
 
-  signal.set = (val: T) => {
+  const set: Setter<T> = (val: T) => {
     value = val;
     tracking.forEach((scope) => scope.run());
   };
 
-  return signal;
+  return [get, set];
 }
 
 export function createEffect(effect: Effect): void {
@@ -75,15 +75,15 @@ export function createEffect(effect: Effect): void {
 }
 
 export function createMemo<T>(update: Accessor<T>): Accessor<T> {
-  const signal = createSignal<T>(0 as any);
-  createEffect(() => signal.set(update()));
-  return () => signal();
+  const [get, set] = createSignal<T>(0 as any);
+  createEffect(() => set(update()));
+  return get;
 }
 
-export function get<T>(read: Accessor<T>) {
+export function untrack<T>(accessor: Accessor<T>) {
   const parentScope = currentScope;
   currentScope = undefined;
-  const value = read();
+  const value = accessor();
   currentScope = parentScope;
   return value;
 }
