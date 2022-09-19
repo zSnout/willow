@@ -38,11 +38,11 @@ export class EffectScope {
   }
 }
 
-export function isAccessor(value: unknown): value is Accessor<unknown> {
+export function isAccessor(value: unknown): value is Accessor<any> {
   return typeof value === "function";
 }
 
-export function isSignal(value: unknown): value is Signal<unknown> {
+export function isSignal(value: unknown): value is Signal<any> {
   return isAccessor(value) && "set" in value;
 }
 
