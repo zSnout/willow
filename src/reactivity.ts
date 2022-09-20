@@ -124,6 +124,11 @@ const setKeys = new Set<string | symbol>(["add", "clear", "delete"]);
 const mapKeys = new Set<string | symbol>(["clear", "delete", "set"]);
 
 export function createReactive<T extends object>(object: T): T {
+  // Functions and Nodes are excluded from deep reactivity for performance reasons.
+  if (typeof object === "function" || object instanceof Node) {
+    return object;
+  }
+
   const tracking = new Set<EffectScope>();
 
   return new Proxy<T>(object, {
@@ -137,14 +142,13 @@ export function createReactive<T extends object>(object: T): T {
 
       const value = Reflect.get(target, key, receiver);
 
-      // Functions and Nodes are excluded from deep reactivity.
-      if (typeof value === "object" && !(value instanceof Node)) {
+      if (typeof value === "object") {
         return createReactive(value);
       } else if (
         typeof value === "function" &&
-        ((object instanceof Array && arrayKeys.has(key)) ||
-          (object instanceof Set && setKeys.has(key)) ||
-          (object instanceof Map && mapKeys.has(key)))
+        ((target instanceof Array && arrayKeys.has(key)) ||
+          (target instanceof Set && setKeys.has(key)) ||
+          (target instanceof Map && mapKeys.has(key)))
       ) {
         return function (this: any) {
           const result = value.apply(this, arguments);
