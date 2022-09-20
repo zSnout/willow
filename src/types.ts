@@ -22,8 +22,7 @@ declare global {
     }
 
     interface IntrinsicAttributes {
-      ref?: Signal<Node>;
-      use?: (node: Node) => void;
+      use?: Setter<Node>;
     }
 
     interface ElementTagNameMap {
@@ -211,8 +210,7 @@ declare global {
     }
 
     interface BaseAttributes<T> extends BindableFor<T> {
-      ref?: Setter<T>;
-      use?: (node: T) => void;
+      use?: Setter<T>;
     }
 
     type Child =
