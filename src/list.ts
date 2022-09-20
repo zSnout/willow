@@ -2,16 +2,21 @@ import { createEffect } from "./reactivity.js";
 
 export function List({
   children,
+  fallback,
 }: {
   children: readonly JSX.Element[];
+  fallback?: JSX.Element;
 }): JSX.Element {
-  const fallback = document.createComment(" DynamicList ");
+  if (!fallback) {
+    fallback = document.createComment(" DynamicList ");
+  }
+
   let prev: JSX.Element[] = [];
 
   createEffect(() => {
     prev.forEach((element) => element.remove());
 
-    let last: ChildNode = fallback;
+    let last: ChildNode = fallback!;
     for (const element of children) {
       console.log(element);
 
