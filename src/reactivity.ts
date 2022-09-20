@@ -107,11 +107,27 @@ export function unref<T>(accessor: ValueOrAccessor<T>): T {
   }
 }
 
+const arrayKeys = new Set<string | symbol>([
+  "pop",
+  "push",
+  "reverse",
+  "shift",
+  "sort",
+  "splice",
+  "unshift",
+  "fill",
+  "copyWithin",
+]);
+
+const setKeys = new Set<string | symbol>(["add", "clear", "delete"]);
+
+const mapKeys = new Set<string | symbol>(["clear", "delete", "set"]);
+
 export function createReactive<T extends object>(object: T): T {
   const tracking = new Set<EffectScope>();
 
   return new Proxy<T>(object, {
-    get(...args) {
+    get(target, key, receiver) {
       const scope = currentScope;
 
       if (scope) {
@@ -119,20 +135,28 @@ export function createReactive<T extends object>(object: T): T {
         tracking.add(scope);
       }
 
-      const value = Reflect.get(...args);
+      const value = Reflect.get(target, key, receiver);
 
       // Functions are intentionally non-reactive.
       if (typeof value === "object") {
         return createReactive(value);
+      } else if (
+        typeof value === "function" &&
+        ((object instanceof Array && arrayKeys.has(key)) ||
+          (object instanceof Set && setKeys.has(key)) ||
+          (object instanceof Map && mapKeys.has(key)))
+      ) {
+        return function (this: any) {
+          value.apply(this, arguments);
+          tracking.forEach((scope) => scope.run());
+        };
       } else {
         return value;
       }
     },
     set(...args) {
       const result = Reflect.set(...args);
-
       tracking.forEach((scope) => scope.run());
-
       return result;
     },
   });
