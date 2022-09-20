@@ -4,8 +4,8 @@
  * https://github.com/adamhaile/surplus/blob/master/index.d.ts
  */
 
-import * as csstype from "csstype";
-import { Setter, Signal, ValueOrAccessor } from "./reactivity";
+import { StandardProperties } from "csstype";
+import { Setter, Signal, ValueOrAccessor } from "./reactivity.js";
 
 declare global {
   namespace JSX {
@@ -504,7 +504,7 @@ declare global {
       srcSet?: ValueOrAccessor<string | undefined>;
       start?: ValueOrAccessor<number | undefined>;
       step?: ValueOrAccessor<number | string | undefined>;
-      style?: Partial<MaybeAccessors<csstype.StandardProperties>> | string;
+      style?: Partial<MaybeAccessors<StandardProperties>> | string;
       summary?: ValueOrAccessor<string | undefined>;
       tabIndex?: ValueOrAccessor<number | undefined>;
       target?: ValueOrAccessor<string | undefined>;
