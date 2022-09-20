@@ -137,8 +137,8 @@ export function createReactive<T extends object>(object: T): T {
 
       const value = Reflect.get(target, key, receiver);
 
-      // Functions are intentionally non-reactive.
-      if (typeof value === "object") {
+      // Functions and Nodes are excluded from deep reactivity.
+      if (typeof value === "object" && !(value instanceof Node)) {
         return createReactive(value);
       } else if (
         typeof value === "function" &&
@@ -147,8 +147,9 @@ export function createReactive<T extends object>(object: T): T {
           (object instanceof Map && mapKeys.has(key)))
       ) {
         return function (this: any) {
-          value.apply(this, arguments);
+          const result = value.apply(this, arguments);
           tracking.forEach((scope) => scope.run());
+          return result;
         };
       } else {
         return value;
