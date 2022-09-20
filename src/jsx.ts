@@ -1,6 +1,7 @@
 import { StandardProperties } from "csstype";
 import {
   createEffect,
+  Effect,
   isAccessor,
   Setter,
   Signal,
@@ -49,7 +50,7 @@ function isArray(value: unknown): value is any[] {
   return Array.isArray(value);
 }
 
-const svgElements = [
+const svgElements = new Set([
   "svg",
   "animate",
   "animateTransform",
@@ -105,10 +106,10 @@ const svgElements = [
   "tspan",
   "use",
   "view",
-];
+]);
 
 function element(tag: string) {
-  if (svgElements.includes(tag)) {
+  if (svgElements.has(tag)) {
     return document.createElementNS("http://www.w3.org/2000/svg", tag);
   }
 
@@ -144,12 +145,18 @@ function fragment() {
   return document.createDocumentFragment();
 }
 
+function addNodeEffect(node: Node, effect: Effect) {
+  const scope = createEffect(effect);
+
+  (node.willowScopes ||= new Set()).add(scope);
+}
+
 function appendAll(parent: Node, children: JSX.Child) {
   if (isArray(children)) {
     children.forEach((child) => appendAll(parent, child));
   } else if (isAccessor(children)) {
     const node = text("");
-    createEffect(() => (node.data = "" + children()));
+    addNodeEffect(node, () => (node.data = "" + children()));
 
     append(parent, node);
   } else if (isNode(children)) {
@@ -192,7 +199,7 @@ function setStyles(
   value: StyleValue
 ) {
   if (isAccessor(value)) {
-    createEffect(() => setStyles(element, value()));
+    addNodeEffect(element, () => setStyles(element, value()));
   } else if (typeof value === "string") {
     element.setAttribute("style", value);
   } else if (typeof value === "object") {
@@ -200,7 +207,7 @@ function setStyles(
       const val = (value as any)[key];
 
       if (isAccessor(val)) {
-        createEffect(() => ((element.style as any)[key] = val()));
+        addNodeEffect(element, () => ((element.style as any)[key] = val()));
       } else {
         (element.style as any)[key] = val;
       }
@@ -225,7 +232,10 @@ export function h(
         (key === "class" || key === "className")
       ) {
         if (isAccessor(value)) {
-          createEffect(() => (el.className = fromClassLike(value() as any)));
+          addNodeEffect(
+            el,
+            () => (el.className = fromClassLike(value() as any))
+          );
         } else {
           el.className = fromClassLike(value);
         }
@@ -248,13 +258,13 @@ export function h(
         }
       } else if (key.includes("-")) {
         if (isAccessor(value)) {
-          createEffect(() => attr(el, key, value()));
+          addNodeEffect(el, () => attr(el, key, value()));
         } else {
           attr(el, key, value);
         }
       } else {
         if (isAccessor(value)) {
-          createEffect(() => ((el as any)[key] = value()));
+          addNodeEffect(el, () => ((el as any)[key] = value()));
         } else {
           (el as any)[key] = value;
         }
@@ -333,6 +343,12 @@ export abstract class WillowElement<T extends JSX.Props = JSX.Props> {
     this.node = this.render(props);
   }
 
+  cleanup() {
+    cleanupNode(this.node);
+    this.node.remove();
+    this.node = text("");
+  }
+
   emit<K extends keyof T & `on:${string}`>(
     type: K extends `on:${infer T}` ? T : never,
     ...data: Parameters<T[K]>
@@ -341,6 +357,11 @@ export abstract class WillowElement<T extends JSX.Props = JSX.Props> {
   }
 
   abstract render(props: T): JSX.Element;
+}
+
+export function cleanupNode(node: Node) {
+  node.willowScopes?.forEach((scope) => scope.cleanup());
+  node.childNodes.forEach(cleanupNode);
 }
 
 declare global {
@@ -353,6 +374,7 @@ declare global {
       [name: string]: any;
       [bindable: `bind:${string}`]: Signal<any>;
       [event: `on:${string}`]: ((value: any) => void) | (() => void);
+      [slot: `slot:${string}`]: JSX.Element | ((...args: any) => JSX.Element);
       children?: any;
       ref?: Setter<Node>;
       use?: (node: Node) => void;

@@ -5,9 +5,13 @@
  */
 
 import { StandardProperties } from "csstype";
-import { Setter, Signal, ValueOrAccessor } from "./reactivity.js";
+import { EffectScope, Setter, Signal, ValueOrAccessor } from "./reactivity.js";
 
 declare global {
+  interface Node {
+    willowScopes?: Set<EffectScope>;
+  }
+
   namespace JSX {
     type MaybeAccessors<T> = { [K in keyof T]: ValueOrAccessor<T[K]> };
 
@@ -200,9 +204,7 @@ declare global {
       view: SVGAttributes<SVGElement>;
     }
 
-    interface IntrinsicElements extends ElementTagNameMap {
-      [x: `html:${string}`]: {};
-    }
+    interface IntrinsicElements extends ElementTagNameMap {}
 
     interface EventHandler<T, E extends Event> {
       (e: E & { currentTarget: T }): void;

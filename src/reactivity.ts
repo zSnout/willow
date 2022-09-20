@@ -76,7 +76,7 @@ export function createSignal<T>(value?: T): Signal<T> {
 }
 
 export function createEffect(effect: Effect) {
-  new EffectScope(effect);
+  return new EffectScope(effect);
 }
 
 export function createMemo<T>(update: Accessor<T>): Accessor<T> {
