@@ -240,7 +240,7 @@ export function h(
           el.className = fromClassLike(value);
         }
       } else if (key === "classList") {
-      } else if (key === "ref" || key === "use") {
+      } else if (key === "use") {
         if (typeof value === "function") {
           value(el);
         }
@@ -376,8 +376,7 @@ declare global {
       [event: `on:${string}`]: ((value: any) => void) | (() => void);
       [slot: `slot:${string}`]: JSX.Element | ((...args: any) => JSX.Element);
       children?: any;
-      ref?: Setter<Node>;
-      use?: (node: Node) => void;
+      use?: Setter<JSX.Element>;
     }
 
     export interface ElementAttributesProperty {
