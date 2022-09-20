@@ -1,6 +1,6 @@
 import { createEffect } from "./reactivity.js";
 
-export function DynamicList({
+export function List({
   children,
 }: {
   children: readonly JSX.Element[];
