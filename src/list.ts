@@ -18,8 +18,6 @@ export function List({
 
     let last: ChildNode = fallback!;
     for (const element of children) {
-      console.log(element);
-
       last.parentNode?.insertBefore(element, last.nextSibling);
       last = element;
     }
