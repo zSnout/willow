@@ -1154,4 +1154,6 @@ declare global {
       zoomAndPan?: ValueOrAccessor<string | undefined>;
     }
   }
+
+  var DEV: boolean | undefined;
 }
