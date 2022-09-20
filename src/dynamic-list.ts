@@ -1,4 +1,4 @@
-import { createEffect } from "./reactivity";
+import { createEffect } from "./reactivity.js";
 
 export function DynamicList({
   children,
@@ -13,7 +13,9 @@ export function DynamicList({
 
     let last: ChildNode = fallback;
     for (const element of children) {
-      last.appendChild(element);
+      console.log(element);
+
+      last.parentNode?.insertBefore(element, last.nextSibling);
       last = element;
     }
   });

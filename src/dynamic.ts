@@ -1,4 +1,4 @@
-import { Accessor, createEffect, untrack } from "./reactivity";
+import { Accessor, createEffect, untrack } from "./reactivity.js";
 
 export function Dynamic({
   children: get,
