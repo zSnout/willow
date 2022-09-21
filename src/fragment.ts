@@ -8,6 +8,10 @@ class WillowNodeList extends Array<ChildNode & NonDocumentTypeChildNode> {
   }
 }
 
+const nes = "nextElementSibling";
+const ns = "nextSibling";
+const lc = "lastChild";
+
 export class WillowFragment extends Comment {
   after(...nodes: (string | Node)[]) {
     const last = this.n.at(-1);
@@ -70,39 +74,23 @@ export class WillowFragment extends Comment {
     return node;
   }
 
-  get lastChild() {
+  get [lc]() {
     return this.n.at(-1) || null;
   }
 
-  get nextElementSibling() {
-    if (this.lastChild) {
-      return this.lastChild?.nextElementSibling;
+  get [nes]() {
+    if (this[lc]) {
+      return this[lc][nes];
     } else {
-      return super.nextElementSibling;
+      return super[nes];
     }
   }
 
-  get nextSibling() {
-    if (this.lastChild) {
-      return this.lastChild?.nextSibling;
+  get [ns]() {
+    if (this[lc]) {
+      return this[lc][ns];
     } else {
-      return super.nextSibling;
-    }
-  }
-
-  get previousElementSibling() {
-    if (this.lastChild) {
-      return this.lastChild?.previousElementSibling;
-    } else {
-      return super.previousElementSibling;
-    }
-  }
-
-  get previousSibling() {
-    if (this.lastChild) {
-      return this.lastChild?.previousSibling;
-    } else {
-      return super.previousSibling;
+      return super[ns];
     }
   }
 
@@ -129,12 +117,7 @@ export class WillowFragment extends Comment {
     return child;
   }
 
-  /** replaceChildrenWith */
-  rcw(...nodes: Node[]) {
-    this.replaceChildrenWith(...nodes);
-  }
-
-  replaceChildrenWith(...nodes: Node[]) {
+  setTo(...nodes: Node[]) {
     this.u();
     this.n.splice(0, this.n.length, ...(nodes as any));
     this.r();
@@ -153,11 +136,13 @@ export class WillowFragment extends Comment {
     super();
     this.data = ` ${name} `;
 
-    this.addEventListener("DOMNodeInserted", () => {
+    this.addEventListener("DOMNodeInserted", (event) => {
+      if (event.target != this) return;
       this.r();
     });
 
-    this.addEventListener("DOMNodeRemoved", () => {
+    this.addEventListener("DOMNodeRemoved", (event) => {
+      if (event.target != this) return;
       this.u();
     });
   }
