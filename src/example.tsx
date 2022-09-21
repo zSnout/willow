@@ -1,3 +1,4 @@
+import { Await } from "./await.js";
 import { For } from "./for.js";
 import { h } from "./jsx.js";
 import { Maybe } from "./maybe.js";
@@ -15,6 +16,34 @@ const plural = createMemo(() => (age() === 1 ? "" : "s"), { name: "plural" });
 const isPlural = createMemo(() => age() !== 1, { name: "isPlural" });
 const nums = createReactive<number[]>([]);
 
+function wait() {
+  return new Promise<any>((resolve, reject) => {
+    setTimeout(() => {
+      if (Math.random() < 0.3) {
+        reject(
+          new Error(
+            `passcode ${(+Math.random().toString().slice(2, 12)).toString(
+              36
+            )} is bad`
+          )
+        );
+      } else {
+        resolve(Math.floor(1000000 * Math.random()));
+      }
+    }, Math.random() * 5000);
+  });
+}
+
+function makeWaitSignal() {
+  const [get, set] = createSignal(wait());
+
+  setInterval(() => {
+    set(wait());
+  }, 10000);
+
+  return get;
+}
+
 function NumberCard(number: number, index: Accessor<number>) {
   return (
     <div>
@@ -25,6 +54,13 @@ function NumberCard(number: number, index: Accessor<number>) {
       <p>{Math.random()}</p>
 
       <button on:click={() => nums.splice(untrack(index), 1)}>remove it</button>
+
+      <Await
+        value={makeWaitSignal()}
+        then={(value) => <>{value}</>}
+        catch={() => <>error</>}
+        pending={<>pending...</>}
+      />
     </div>
   );
 }
