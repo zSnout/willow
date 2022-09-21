@@ -1,8 +1,8 @@
 import { For } from "./for.js";
 import { h } from "./jsx.js";
-import { List } from "./list.js";
 import { Maybe } from "./maybe.js";
 import {
+  Accessor,
   createMemo,
   createReactive,
   createSignal,
@@ -14,6 +14,20 @@ const [name, setName] = createSignal("Zachary", { name: "name" });
 const plural = createMemo(() => (age() === 1 ? "" : "s"), { name: "plural" });
 const isPlural = createMemo(() => age() !== 1, { name: "isPlural" });
 const nums = createReactive<number[]>([]);
+
+function NumberCard(number: number, index: Accessor<number>) {
+  return (
+    <div>
+      <h1>
+        My key is {number} at index {index}.
+      </h1>
+
+      <p>{Math.random()}</p>
+
+      <button on:click={() => nums.splice(untrack(index), 1)}>remove it</button>
+    </div>
+  );
+}
 
 document.body.appendChild(
   <>
@@ -46,15 +60,6 @@ document.body.appendChild(
       remove at random
     </button>
 
-    <For each={nums}>
-      {(num, index) => (
-        <>
-          <h2>
-            main: {num} at {index}
-          </h2>
-          <p>my id: {Math.random()}</p>
-        </>
-      )}
-    </For>
+    <For each={nums}>{NumberCard}</For>
   </>
 );
