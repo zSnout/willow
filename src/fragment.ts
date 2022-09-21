@@ -129,6 +129,11 @@ export class WillowFragment extends Comment {
     return child;
   }
 
+  /** replaceChildrenWith */
+  rcw(...nodes: Node[]) {
+    this.replaceChildrenWith(...nodes);
+  }
+
   replaceChildrenWith(...nodes: Node[]) {
     this.u();
     this.n.splice(0, this.n.length, ...(nodes as any));
