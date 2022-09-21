@@ -146,6 +146,7 @@ export class WillowFragment extends Comment {
 
   constructor(children?: Element[]) {
     super();
+    this.data = " Fragment ";
 
     if (children) {
       this.n.push(...children);
