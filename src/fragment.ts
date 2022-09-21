@@ -117,9 +117,9 @@ export class WillowFragment extends Comment {
     return child;
   }
 
-  setTo(...nodes: Node[]) {
+  setTo(...nodes: (Node | null | undefined)[]) {
     this.u();
-    this.n.splice(0, this.n.length, ...(nodes as any));
+    this.n.splice(0, this.n.length, ...(nodes.filter((x) => x) as any));
     this.r();
   }
 
