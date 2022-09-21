@@ -1,12 +1,28 @@
-import { createSignal } from "./core.js";
 import { h } from "./jsx.js";
+import { Maybe } from "./maybe.js";
+import { createMemo, createReactive, createSignal } from "./reactivity.js";
 
-const [count, setCount] = createSignal(0);
+const [age, setAge] = createSignal(0, { name: "age" });
+const [name, setName] = createSignal("Zachary", { name: "name" });
+const plural = createMemo(() => (age() === 1 ? "" : "s"), { name: "plural" });
+const isPlural = createMemo(() => age() !== 1, { name: "isPlural" });
+const nums = createReactive<JSX.Element[]>([]);
 
-setInterval(() => setCount(count() + 1));
+document.body.appendChild(
+  <div>
+    <input bind:value={[name, setName]} />
+    <input bind:numeric={[age, setAge]} />
 
-const h1 = <h1>{count}</h1>;
+    <h1>
+      {name} is {age} year{plural} old.
+    </h1>
 
-const page = <>{h1}</>;
+    <Maybe when={isPlural}>
+      <p>not plural L</p>
+    </Maybe>
 
-document.body.appendChild(page);
+    <button on:click={() => nums.push(<p>{Math.random()}</p>)}>
+      ayo click me
+    </button>
+  </div>
+);
