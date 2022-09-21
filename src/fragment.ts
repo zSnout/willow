@@ -149,11 +149,11 @@ export class WillowFragment extends Comment {
 
   /** render */
   private r() {
-    super.after(...this.n);
+    super.after(...this.n.filter((x) => x));
   }
 
   /** unrender */
   private u() {
-    this.n.forEach((node) => node.remove());
+    this.n.forEach((node) => node?.remove());
   }
 }
