@@ -8,12 +8,7 @@ export function List({
 }): JSX.Element {
   const node = new WillowFragment("List");
 
-  createEffect(
-    () => {
-      node.rcw(...unref(children));
-    },
-    { name: "<List>" }
-  );
+  createEffect(() => node.setTo(...unref(children)), { name: "<List>" });
 
   return node;
 }
