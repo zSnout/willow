@@ -21,9 +21,9 @@ export function Maybe({
       const result = when() ? children : fallback;
 
       if (result) {
-        node.rcw(result);
+        node.setTo(result);
       } else {
-        node.rcw();
+        node.setTo();
       }
     },
     { name: "<Maybe>" }

@@ -10,7 +10,7 @@ export function Dynamic({
 
   createEffect(
     () => {
-      node.rcw(get());
+      node.setTo(get());
     },
     { name: "<Dynamic>" }
   );
