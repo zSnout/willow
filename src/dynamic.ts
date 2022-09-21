@@ -12,7 +12,7 @@ export function Dynamic({
     () => {
       node.replaceChildrenWith(get());
     },
-    { name: "dynamic component" }
+    { name: "<Dynamic>" }
   );
 
   return node;
