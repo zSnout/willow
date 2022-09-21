@@ -142,8 +142,12 @@ function isNode(value: unknown): value is Node {
   return value instanceof Node;
 }
 
-function addNodeEffect(node: Node, effect: Effect) {
-  const scope = createEffect(effect);
+function addNodeEffect(
+  node: Node,
+  effect: Effect,
+  options?: { name?: string }
+) {
+  const scope = createEffect(effect, options);
 
   (node.willowScopes ||= new Set()).add(scope);
 }
@@ -153,7 +157,10 @@ function appendReactive(parent: Node, children: JSX.Child) {
     children.forEach((child) => appendReactive(parent, child));
   } else if (isAccessor(children)) {
     const node = text("");
-    addNodeEffect(node, () => (node.data = "" + children()));
+
+    addNodeEffect(node, () => (node.data = "" + children()), {
+      name: "reactive text",
+    });
 
     append(parent, node);
   } else if (isNode(children)) {
