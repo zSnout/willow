@@ -1,7 +1,7 @@
 import {
   Accessor,
   createEffect,
-  createReactive,
+  createManualReactive,
   createSignal,
   Setter,
   untrack,
@@ -17,12 +17,9 @@ export function reactiveMap<T, U>(
     [value: U, index: number, setIndex: Setter<number>]
   >();
 
-  const temp: U[] = [];
-  const result = createReactive<U[]>([]);
+  const [result, update] = createManualReactive<U[]>([]);
 
   createEffect(() => {
-    temp.length = 0;
-
     let index = -1;
     for (const item of list) {
       const cached = cache.get(item);
@@ -31,18 +28,19 @@ export function reactiveMap<T, U>(
       if (cached) {
         if (cached[1] !== index) {
           cached[2]((cached[1] = index));
+          result[index] = cached[0];
         }
-
-        temp[index] = cached[0];
       } else {
         const [getIndex, setIndex] = createSignal(index);
         const value = fn(item, getIndex);
         cache.set(item, [value, index, setIndex]);
-        temp[index] = value;
+        result[index] = value;
       }
     }
 
-    untrack(() => result.splice(0, result.length, ...temp));
+    result.length = ++index;
+
+    update();
   }, options);
 
   return result;
