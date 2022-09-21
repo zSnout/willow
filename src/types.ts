@@ -5,7 +5,7 @@
  */
 
 import { StandardProperties } from "csstype";
-import { EffectScope, Setter, Signal, ValueOrAccessor } from "./reactivity.js";
+import { EffectScope, Setter, ValueOrAccessor } from "./reactivity.js";
 
 declare global {
   interface Node {
