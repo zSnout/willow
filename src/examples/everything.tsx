@@ -1,15 +1,15 @@
-import { Await } from "./await.js";
-import { Dynamic } from "./dynamic.js";
-import { For } from "./for.js";
-import { h } from "./jsx.js";
-import { Maybe } from "./maybe.js";
+import { Await } from "../await.js";
+import { Dynamic } from "../dynamic.js";
+import { For } from "../for.js";
+import { h } from "../jsx.js";
+import { Maybe } from "../maybe.js";
 import {
   Accessor,
   createMemo,
   createReactive,
   createSignal,
   untrack,
-} from "./reactivity.js";
+} from "../reactivity.js";
 
 const [age, setAge] = createSignal(14, { name: "age" });
 const [name, setName] = createSignal("Zachary", { name: "name" });
