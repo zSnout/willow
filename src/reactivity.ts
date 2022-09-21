@@ -14,27 +14,49 @@ export function getScope() {
 }
 
 export class EffectScope {
-  readonly onCleanup = new Set<Effect>();
+  private readonly t = new Set<
+    /** `tracking` variable of Signals */ Set<EffectScope>
+  >();
 
-  constructor(private readonly effect: Effect) {
-    if (currentScope) {
-      currentScope.onCleanup.add(() => this.cleanup());
-    }
+  /** children */
+  private readonly c = new Set<EffectScope>();
+
+  constructor(private readonly effect: Effect, readonly name?: string) {
+    currentScope?.c.add(this);
 
     this.run();
   }
 
+  track(set: Set<EffectScope>) {
+    this.t.add(set);
+  }
+
   cleanup() {
-    const onCleanup = [...this.onCleanup];
-    this.onCleanup.clear();
-    onCleanup.forEach((fn) => fn());
+    if (DEV) devLog("effect", "cleaned up", this.name);
+
+    this.t.forEach((tracker) => tracker.delete(this));
+    this.t.clear();
+    this.c.forEach((scope) => scope.cleanup());
+    this.c.clear();
   }
 
   run() {
+    if (DEV) {
+      if (this.name) {
+        console.group(`effect '${this.name}'`);
+      } else {
+        console.group(`effect`);
+      }
+    }
+
     const parentScope = currentScope;
     currentScope = this;
     this.effect();
     currentScope = parentScope;
+
+    if (DEV) {
+      console.groupEnd();
+    }
   }
 }
 
@@ -51,16 +73,30 @@ export function isSignal(value: unknown): value is Signal<any> {
   );
 }
 
+function devLog(type: string, action: string, name: string | undefined) {
+  if (DEV && name) {
+    console.log(`${type} '${name}' ${action}`);
+  }
+}
+
 export function createSignal<T = any>(): Signal<T | undefined>;
-export function createSignal<T>(value: T): Signal<T>;
-export function createSignal<T>(value?: T): Signal<T> {
+export function createSignal<T>(
+  value: T,
+  options?: { name?: string }
+): Signal<T>;
+export function createSignal<T>(
+  value?: T,
+  options?: { name?: string }
+): Signal<T> {
   const tracking = new Set<EffectScope>();
 
   const get: Accessor<T> = () => {
+    if (DEV) devLog("signal", "accessed", options?.name);
+
     const scope = currentScope;
 
     if (scope) {
-      scope.onCleanup.add(() => tracking.delete(scope));
+      scope.track(tracking);
       tracking.add(scope);
     }
 
@@ -68,6 +104,8 @@ export function createSignal<T>(value?: T): Signal<T> {
   };
 
   const set: Setter<T> = (val: T) => {
+    if (DEV) devLog("signal", "set", options?.name);
+
     value = val;
     tracking.forEach((scope) => scope.run());
   };
@@ -75,13 +113,19 @@ export function createSignal<T>(value?: T): Signal<T> {
   return [get, set];
 }
 
-export function createEffect(effect: Effect) {
-  return new EffectScope(effect);
+export function createEffect(effect: Effect, options?: { name?: string }) {
+  return new EffectScope(effect, options?.name);
 }
 
-export function createMemo<T>(update: Accessor<T>): Accessor<T> {
+export function createMemo<T>(
+  update: Accessor<T>,
+  options?: { name?: string }
+): Accessor<T> {
   const [get, set] = createSignal<T>(0 as any);
-  createEffect(() => set(update()));
+  createEffect(() => {
+    if (DEV) devLog("memo", "evaluated", options?.name);
+    set(update());
+  });
   return get;
 }
 
@@ -123,7 +167,10 @@ const setKeys = new Set<string | symbol>(["add", "clear", "delete"]);
 
 const mapKeys = new Set<string | symbol>(["clear", "delete", "set"]);
 
-export function createReactive<T extends object>(object: T): T {
+export function createReactive<T extends object>(
+  object: T,
+  options?: { name?: string }
+): T {
   // Functions and Nodes are excluded from deep reactivity for performance reasons.
   if (typeof object === "function" || object instanceof Node) {
     return object;
@@ -133,18 +180,9 @@ export function createReactive<T extends object>(object: T): T {
 
   return new Proxy<T>(object, {
     get(target, key, receiver) {
-      const scope = currentScope;
-
-      if (scope) {
-        scope.onCleanup.add(() => tracking.delete(scope));
-        tracking.add(scope);
-      }
-
       const value = Reflect.get(target, key, receiver);
 
-      if (typeof value === "object") {
-        return createReactive(value);
-      } else if (
+      if (
         typeof value === "function" &&
         ((target instanceof Array && arrayKeys.has(key)) ||
           (target instanceof Set && setKeys.has(key)) ||
@@ -155,14 +193,45 @@ export function createReactive<T extends object>(object: T): T {
           tracking.forEach((scope) => scope.run());
           return result;
         };
+      }
+
+      if (DEV)
+        devLog(
+          `property ${String(key)} of reactive ${
+            (target as any)[Symbol.toStringTag] || "Object"
+          }`,
+          "accessed",
+          options?.name
+        );
+
+      const scope = currentScope;
+
+      if (scope) {
+        scope.track(tracking);
+        tracking.add(scope);
+      }
+
+      if (typeof value === "object") {
+        return createReactive(value);
       } else {
         return value;
       }
     },
     set(...args) {
+      if (DEV)
+        devLog(
+          `property ${String(args[1])} of reactive ${
+            (args[0] as any)[Symbol.toStringTag] || "Object"
+          }`,
+          "set",
+          options?.name
+        );
+
       const result = Reflect.set(...args);
       tracking.forEach((scope) => scope.run());
       return result;
     },
   });
 }
+
+globalThis.DEV = true;
