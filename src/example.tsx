@@ -1,4 +1,5 @@
 import { Await } from "./await.js";
+import { Dynamic } from "./dynamic.js";
 import { For } from "./for.js";
 import { h } from "./jsx.js";
 import { Maybe } from "./maybe.js";
@@ -65,6 +66,18 @@ function NumberCard(number: number, index: Accessor<number>) {
   );
 }
 
+const [quote, setQuote] = createSignal(
+  <blockquote>{Math.random()}</blockquote>
+);
+
+setTimeout(() => {
+  setQuote(<p>abc</p>);
+
+  setTimeout(() => {
+    setQuote(<h3>another heading</h3>);
+  }, 5000);
+}, 5000);
+
 document.body.appendChild(
   <>
     <input bind:value={[name, setName]} />
@@ -77,6 +90,8 @@ document.body.appendChild(
     <Maybe when={isPlural}>
       <p>not plural L</p>
     </Maybe>
+
+    <Dynamic>{quote}</Dynamic>
 
     <button on:click={() => nums.push(Math.random())}>add at end</button>
 
