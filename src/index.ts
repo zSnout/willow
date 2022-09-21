@@ -5,5 +5,6 @@ export * from "./for.js";
 export * from "./fragment.js";
 export * from "./jsx.js";
 export * from "./list.js";
+export * from "./map.js";
 export * from "./maybe.js";
 export * from "./reactivity.js";
