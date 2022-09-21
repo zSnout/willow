@@ -1,7 +1,7 @@
 {
-  "name": "@willow/willowjs",
+  "name": "@zsnout/willow",
   "version": "0.1.0",
-  "description": "",
+  "description": "Willow is a reactive web framework that enables JSX syntax, compiles to DOM nodes, and omits a virtual DOM.",
   "main": "index.js",
   "scripts": {
     "build": "tsc -b && npm run bundle",
