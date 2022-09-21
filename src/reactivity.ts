@@ -120,9 +120,7 @@ export function createMemo<T>(
   const [get, set] = createSignal<T>(0 as any);
 
   createEffect(
-    () => {
-      set(update());
-    },
+    () => set(update()),
     options?.name ? { name: `memo '${options?.name}'` } : {}
   );
 
