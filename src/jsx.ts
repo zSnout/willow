@@ -6,21 +6,46 @@ import {
   isAccessor,
   Setter,
   Signal,
-  untrack,
 } from "./reactivity.js";
 
 namespace Bindable {
   export function value([get, set]: Signal<string>) {
     return (el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) => {
-      el.value = get();
-      listen(el, "input", () => set(el.value));
+      let isUpdating = false;
+
+      createEffect(
+        () => {
+          if (isUpdating) return;
+          el.value = get();
+        },
+        { name: "bind:value" }
+      );
+
+      listen(el, "input", () => {
+        isUpdating = true;
+        set(el.value);
+        isUpdating = false;
+      });
     };
   }
 
   export function numeric([get, set]: Signal<number>) {
     return (el: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) => {
-      el.value = "" + Number(untrack(get));
-      listen(el, "input", () => set(+el.value));
+      let isUpdating = false;
+
+      createEffect(
+        () => {
+          if (isUpdating) return;
+          el.value = "" + get();
+        },
+        { name: "bind:numeric" }
+      );
+
+      listen(el, "input", () => {
+        isUpdating = true;
+        set(+el.value);
+        isUpdating = false;
+      });
     };
   }
 
