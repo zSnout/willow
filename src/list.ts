@@ -10,7 +10,7 @@ export function List({
 
   createEffect(
     () => {
-      node.replaceChildrenWith(...unref(children));
+      node.rcw(...unref(children));
     },
     { name: "<List>" }
   );

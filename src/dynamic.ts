@@ -10,7 +10,7 @@ export function Dynamic({
 
   createEffect(
     () => {
-      node.replaceChildrenWith(get());
+      node.rcw(get());
     },
     { name: "<Dynamic>" }
   );
