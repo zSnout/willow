@@ -84,6 +84,12 @@ export function createSignal<T>(
   value?: T,
   options?: { name?: string }
 ): Signal<T> {
+  if (DEV && typeof value === "function") {
+    console.warn(
+      "Signals should not be used to store functions. This may lead to issues when passed to a prop requiring a ValueOrAccessor."
+    );
+  }
+
   const tracking = new Set<EffectScope>();
 
   const get: Accessor<T> = () => {
