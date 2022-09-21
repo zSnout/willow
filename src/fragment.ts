@@ -10,10 +10,6 @@ class WillowNodeList extends Array<ChildNode & NonDocumentTypeChildNode> {
 
 export class WillowFragment extends Comment {
   after(...nodes: (string | Node)[]) {
-    if (!this.parentNode) {
-      return;
-    }
-
     const last = this.n.at(-1);
 
     if (last) {
@@ -21,6 +17,8 @@ export class WillowFragment extends Comment {
     } else {
       super.after(...nodes);
     }
+
+    this.render();
   }
 
   appendChild<T extends Node>(node: T) {
@@ -37,6 +35,8 @@ export class WillowFragment extends Comment {
     } else {
       super.before(...nodes);
     }
+
+    this.render();
   }
 
   get children(): HTMLCollection {
@@ -66,6 +66,7 @@ export class WillowFragment extends Comment {
     if (index === -1) return node;
 
     this.n.splice(index, 0, node as any);
+    this.render();
     return node;
   }
 
@@ -108,34 +109,35 @@ export class WillowFragment extends Comment {
   remove() {
     super.remove();
     this.n.forEach((node) => node.remove());
+    this.render();
   }
 
-  removeChild<T extends Node>(child: T): T {
+  removeChild<T extends Node>(child: T) {
     const index = this.n.indexOf(child as any);
     if (index === -1) return child;
 
     this.n.splice(index, 1);
+    this.render();
     return child;
   }
 
-  replaceChild<T extends Node>(node: Node, child: T): T {
+  replaceChild<T extends Node>(node: Node, child: T) {
     const index = this.n.indexOf(node as any);
     if (index === -1) return child;
 
     this.n.splice(index, 1, child as any);
+    this.render();
     return child;
   }
 
-  replaceWith(...nodes: (string | Node)[]): void {
+  replaceWith(...nodes: (string | Node)[]) {
     this.n.forEach((node) => node.remove());
     super.replaceWith(...nodes);
+    this.render();
   }
 
   /** nodes */
   private n = new WillowNodeList();
-
-  /** fragment */
-  private f = new DocumentFragment();
 
   constructor(children?: Element[]) {
     super();
@@ -146,7 +148,6 @@ export class WillowFragment extends Comment {
   }
 
   private render() {
-    this.f.append(...this.n);
-    super.after(this.f);
+    super.after(...this.n);
   }
 }
