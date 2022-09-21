@@ -11,11 +11,11 @@ import {
   untrack,
 } from "./reactivity.js";
 
-const [age, setAge] = createSignal(0, { name: "age" });
+const [age, setAge] = createSignal(14, { name: "age" });
 const [name, setName] = createSignal("Zachary", { name: "name" });
 const plural = createMemo(() => (age() === 1 ? "" : "s"), { name: "plural" });
 const isPlural = createMemo(() => age() !== 1, { name: "isPlural" });
-const nums = createReactive<number[]>([]);
+const nums = createReactive<number[]>([], { name: "number list" });
 
 function wait() {
   return new Promise<any>((resolve, reject) => {
@@ -36,7 +36,7 @@ function wait() {
 }
 
 function makeWaitSignal() {
-  const [get, set] = createSignal(wait());
+  const [get, set] = createSignal(wait(), { name: "wait signal" });
 
   setInterval(() => {
     set(wait());
@@ -47,7 +47,7 @@ function makeWaitSignal() {
 
 function NumberCard(number: number, index: Accessor<number>) {
   return (
-    <div>
+    <div style={{ backgroundColor: "black", color: "white" }}>
       <h1>
         My key is {number} at index {index}.
       </h1>
@@ -67,7 +67,8 @@ function NumberCard(number: number, index: Accessor<number>) {
 }
 
 const [quote, setQuote] = createSignal(
-  <blockquote>{Math.random()}</blockquote>
+  <blockquote>{Math.random()}</blockquote>,
+  { name: "blockquote" }
 );
 
 setTimeout(() => {
@@ -111,6 +112,14 @@ document.body.appendChild(
       remove at random
     </button>
 
-    <For each={nums}>{NumberCard}</For>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(min(400px, 100%), 1fr))",
+        gap: "0.5em",
+      }}
+    >
+      <For each={nums}>{NumberCard}</For>
+    </div>
   </>
 );
