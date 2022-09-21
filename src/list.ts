@@ -6,7 +6,7 @@ export function List({
 }: {
   children: ValueOrAccessor<Iterable<JSX.Element>>;
 }): JSX.Element {
-  const node = new WillowFragment();
+  const node = new WillowFragment("List");
 
   createEffect(
     () => {

@@ -6,7 +6,7 @@ export function Dynamic({
 }: {
   children: Accessor<JSX.Element>;
 }): JSX.Element {
-  const node = new WillowFragment();
+  const node = new WillowFragment("Dynamic");
 
   createEffect(
     () => {
