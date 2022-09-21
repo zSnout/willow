@@ -196,14 +196,19 @@ function fromClassLike(value: unknown): string {
   return "";
 }
 
-type StyleValue = StandardProperties | string | (() => StyleValue);
+type StyleValue =
+  | JSX.MaybeAccessors<StandardProperties>
+  | string
+  | (() => StyleValue);
 
 function setStyles(
   element: Element & ElementCSSInlineStyle,
   value: StyleValue
 ) {
   if (isAccessor(value)) {
-    addNodeEffect(element, () => setStyles(element, value()));
+    addNodeEffect(element, () => setStyles(element, value()), {
+      name: "css style object",
+    });
   } else if (typeof value === "string") {
     element.setAttribute("style", value);
   } else if (typeof value === "object") {
@@ -211,7 +216,9 @@ function setStyles(
       const val = (value as any)[key];
 
       if (isAccessor(val)) {
-        addNodeEffect(element, () => ((element.style as any)[key] = val()));
+        addNodeEffect(element, () => ((element.style as any)[key] = val()), {
+          name: `css style.${key}`,
+        });
       } else {
         (element.style as any)[key] = val;
       }
@@ -238,7 +245,8 @@ export function h(
         if (isAccessor(value)) {
           addNodeEffect(
             el,
-            () => (el.className = fromClassLike(value() as any))
+            () => (el.className = fromClassLike(value() as any)),
+            { name: "className" }
           );
         } else {
           el.className = fromClassLike(value);
@@ -262,13 +270,17 @@ export function h(
         }
       } else if (key.includes("-")) {
         if (isAccessor(value)) {
-          addNodeEffect(el, () => attr(el, key, value()));
+          addNodeEffect(el, () => attr(el, key, value()), {
+            name: `element attribute ${key}`,
+          });
         } else {
           attr(el, key, value);
         }
       } else {
         if (isAccessor(value)) {
-          addNodeEffect(el, () => ((el as any)[key] = value()));
+          addNodeEffect(el, () => ((el as any)[key] = value()), {
+            name: `element property ${key}`,
+          });
         } else {
           (el as any)[key] = value;
         }
