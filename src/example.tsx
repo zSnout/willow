@@ -2,7 +2,12 @@ import { For } from "./for.js";
 import { h } from "./jsx.js";
 import { List } from "./list.js";
 import { Maybe } from "./maybe.js";
-import { createMemo, createReactive, createSignal } from "./reactivity.js";
+import {
+  createMemo,
+  createReactive,
+  createSignal,
+  untrack,
+} from "./reactivity.js";
 
 const [age, setAge] = createSignal(0, { name: "age" });
 const [name, setName] = createSignal("Zachary", { name: "name" });
@@ -23,12 +28,30 @@ document.body.appendChild(
       <p>not plural L</p>
     </Maybe>
 
-    <button on:click={() => nums.push(Math.random())}>ayo click me</button>
+    <button on:click={() => nums.push(Math.random())}>add at end</button>
+
+    <br />
+
+    <button on:click={() => nums.unshift(Math.random())}>add at front</button>
+
+    <br />
+
+    <button
+      on:click={() => {
+        const index = Math.floor(nums.length * Math.random());
+        console.log(index);
+        nums.splice(index, 1);
+      }}
+    >
+      remove at random
+    </button>
 
     <For each={nums}>
-      {(num) => (
+      {(num, index) => (
         <>
-          <h2>main: {num}</h2>
+          <h2>
+            main: {num} at {index}
+          </h2>
           <p>my id: {Math.random()}</p>
         </>
       )}
