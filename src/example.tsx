@@ -9,7 +9,7 @@ const isPlural = createMemo(() => age() !== 1, { name: "isPlural" });
 const nums = createReactive<JSX.Element[]>([]);
 
 document.body.appendChild(
-  <div>
+  <>
     <input bind:value={[name, setName]} />
     <input bind:numeric={[age, setAge]} />
 
@@ -24,5 +24,5 @@ document.body.appendChild(
     <button on:click={() => nums.push(<p>{Math.random()}</p>)}>
       ayo click me
     </button>
-  </div>
+  </>
 );
