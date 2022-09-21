@@ -43,7 +43,7 @@ export class EffectScope {
   run() {
     if (DEV) {
       if (this.name) {
-        console.group(`effect '${this.name}'`);
+        console.group(`${this.name}`);
       } else {
         console.group(`effect`);
       }
@@ -122,10 +122,14 @@ export function createMemo<T>(
   options?: { name?: string }
 ): Accessor<T> {
   const [get, set] = createSignal<T>(0 as any);
-  createEffect(() => {
-    if (DEV) devLog("memo", "evaluated", options?.name);
-    set(update());
-  });
+
+  createEffect(
+    () => {
+      set(update());
+    },
+    options?.name ? { name: `memo '${options?.name}'` } : {}
+  );
+
   return get;
 }
 
