@@ -1,4 +1,5 @@
-import { createComputed, untrack, ValueOrAccessor } from "./reactivity.js";
+import { WillowFragment } from "./fragment.js";
+import { createEffect, ValueOrAccessor } from "./reactivity.js";
 
 export function Maybe({
   when,
@@ -9,25 +10,24 @@ export function Maybe({
   fallback?: JSX.Element;
   children: JSX.Element;
 }) {
-  if (!fallback) {
-    fallback = document.createComment(" Maybe ");
-  }
-
   if (typeof when === "boolean") {
-    return when ? children : fallback;
+    return when ? children : fallback || document.createComment(" Maybe ");
   }
 
-  const node = untrack(when) ? children : fallback;
+  const node = new WillowFragment("Maybe");
 
-  const computed = createComputed(node, (oldNode) => {
-    const node = when() ? children : fallback!;
+  createEffect(
+    () => {
+      const result = when() ? children : fallback;
 
-    if (node !== oldNode) {
-      oldNode.replaceWith(node);
-    }
+      if (result) {
+        node.rcw(result);
+      } else {
+        node.rcw();
+      }
+    },
+    { name: "<Maybe>" }
+  );
 
-    return node;
-  });
-
-  return untrack(computed);
+  return node;
 }
