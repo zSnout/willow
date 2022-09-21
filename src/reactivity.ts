@@ -103,7 +103,7 @@ export function createSignal<T>(
     if (DEV) devLog("signal", "set", options?.name);
 
     value = val;
-    tracking.forEach((scope) => scope.run());
+    tracking.forEach((effect) => effect.run());
   };
 
   return [get, set];
@@ -200,7 +200,7 @@ export function createReactive<T extends object>(
       ) {
         return function (this: any) {
           const result = value.apply(this, arguments);
-          tracking.forEach((scope) => scope.run());
+          tracking.forEach((effect) => effect.run());
           return result;
         };
       }
@@ -238,10 +238,49 @@ export function createReactive<T extends object>(
         );
 
       const result = Reflect.set(...args);
-      tracking.forEach((scope) => scope.run());
+      tracking.forEach((effect) => effect.run());
       return result;
     },
   });
+}
+
+export type ManualReactive<T> = [proxy: T, update: Effect];
+
+export function createManualReactive<T extends object>(
+  object: T,
+  options?: { name?: string }
+): ManualReactive<T> {
+  const tracking = new Set<EffectScope>();
+
+  const proxy = new Proxy<T>(object, {
+    get(target, key, receiver) {
+      const value = Reflect.get(target, key, receiver);
+
+      if (DEV)
+        devLog(
+          `property ${String(key)} of manual reactive ${
+            (target as any)[Symbol.toStringTag] || "Object"
+          }`,
+          "accessed",
+          options?.name
+        );
+
+      const scope = currentScope;
+
+      if (scope) {
+        scope.track(tracking);
+        tracking.add(scope);
+      }
+
+      if (typeof value === "object" && value) {
+        return createReactive(value);
+      } else {
+        return value;
+      }
+    },
+  });
+
+  return [proxy, () => tracking.forEach((effect) => effect.run())];
 }
 
 globalThis.DEV = true;
