@@ -130,6 +130,12 @@ export class WillowFragment extends Comment {
     return child;
   }
 
+  replaceChildrenWith(...nodes: Node[]) {
+    this.n.forEach((node) => node.remove());
+    this.n.splice(0, this.n.length, ...(nodes as any));
+    this.render();
+  }
+
   replaceWith(...nodes: (string | Node)[]) {
     this.n.forEach((node) => node.remove());
     super.replaceWith(...nodes);
