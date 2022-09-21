@@ -1,4 +1,5 @@
 import { StandardProperties } from "csstype";
+import { WillowFragment } from "./fragment.js";
 import {
   createEffect,
   Effect,
@@ -141,19 +142,15 @@ function isNode(value: unknown): value is Node {
   return value instanceof Node;
 }
 
-function fragment() {
-  return document.createDocumentFragment();
-}
-
 function addNodeEffect(node: Node, effect: Effect) {
   const scope = createEffect(effect);
 
   (node.willowScopes ||= new Set()).add(scope);
 }
 
-function appendAll(parent: Node, children: JSX.Child) {
+function appendReactive(parent: Node, children: JSX.Child) {
   if (isArray(children)) {
-    children.forEach((child) => appendAll(parent, child));
+    children.forEach((child) => appendReactive(parent, child));
   } else if (isAccessor(children)) {
     const node = text("");
     addNodeEffect(node, () => (node.data = "" + children()));
@@ -222,7 +219,7 @@ export function h(
 ): JSX.Element {
   if (typeof tag === "string") {
     const el = element(tag);
-    appendAll(el, children as JSX.Child);
+    appendReactive(el, children as JSX.Child);
 
     for (const key in props) {
       const value = props[key];
@@ -303,11 +300,11 @@ export function h(
 }
 
 export namespace h {
-  export function f({ children }: JSX.Props) {
-    const frag = fragment();
-    appendAll(frag, children);
+  export function f({ children }: { children: JSX.Child }) {
+    const fragment = new WillowFragment();
+    appendReactive(fragment, children);
 
-    return frag;
+    return fragment;
   }
 }
 
