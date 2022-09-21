@@ -144,13 +144,9 @@ export class WillowFragment extends Comment {
   /** nodes */
   private n = new WillowNodeList();
 
-  constructor(children?: Element[]) {
+  constructor(name = "Fragment") {
     super();
-    this.data = " Fragment ";
-
-    if (children) {
-      this.n.push(...children);
-    }
+    this.data = ` ${name} `;
 
     this.addEventListener("DOMNodeInserted", () => {
       this.r();
