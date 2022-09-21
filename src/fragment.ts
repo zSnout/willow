@@ -18,12 +18,12 @@ export class WillowFragment extends Comment {
       super.after(...nodes);
     }
 
-    this.render();
+    this.r();
   }
 
   appendChild<T extends Node>(node: T) {
     this.n.push(node as any);
-    this.render();
+    this.r();
     return node;
   }
 
@@ -36,7 +36,7 @@ export class WillowFragment extends Comment {
       super.before(...nodes);
     }
 
-    this.render();
+    this.r();
   }
 
   get children(): HTMLCollection {
@@ -66,7 +66,7 @@ export class WillowFragment extends Comment {
     if (index === -1) return node;
 
     this.n.splice(index, 0, node as any);
-    this.render();
+    this.r();
     return node;
   }
 
@@ -108,8 +108,7 @@ export class WillowFragment extends Comment {
 
   remove() {
     super.remove();
-    this.n.forEach((node) => node.remove());
-    this.render();
+    this.u();
   }
 
   removeChild<T extends Node>(child: T) {
@@ -117,7 +116,7 @@ export class WillowFragment extends Comment {
     if (index === -1) return child;
 
     this.n.splice(index, 1);
-    this.render();
+    this.r();
     return child;
   }
 
@@ -126,20 +125,20 @@ export class WillowFragment extends Comment {
     if (index === -1) return child;
 
     this.n.splice(index, 1, child as any);
-    this.render();
+    this.r();
     return child;
   }
 
   replaceChildrenWith(...nodes: Node[]) {
-    this.n.forEach((node) => node.remove());
+    this.u();
     this.n.splice(0, this.n.length, ...(nodes as any));
-    this.render();
+    this.r();
   }
 
   replaceWith(...nodes: (string | Node)[]) {
-    this.n.forEach((node) => node.remove());
+    this.u();
     super.replaceWith(...nodes);
-    this.render();
+    this.r();
   }
 
   /** nodes */
@@ -151,9 +150,23 @@ export class WillowFragment extends Comment {
     if (children) {
       this.n.push(...children);
     }
+
+    this.addEventListener("DOMNodeInserted", () => {
+      this.r();
+    });
+
+    this.addEventListener("DOMNodeRemoved", () => {
+      this.u();
+    });
   }
 
-  private render() {
+  /** render */
+  private r() {
     super.after(...this.n);
+  }
+
+  /** unrender */
+  private u() {
+    this.n.forEach((node) => node.remove());
   }
 }
