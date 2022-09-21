@@ -1,12 +1,19 @@
-import { Accessor, createEffect, untrack } from "./reactivity.js";
+import { WillowFragment } from "./fragment.js";
+import { Accessor, createEffect } from "./reactivity.js";
 
 export function Dynamic({
   children: get,
 }: {
   children: Accessor<JSX.Element>;
 }): JSX.Element {
-  let node = untrack(get);
-  createEffect(() => node.replaceWith((node = get())));
+  const node = new WillowFragment();
+
+  createEffect(
+    () => {
+      node.replaceChildrenWith(get());
+    },
+    { name: "dynamic component" }
+  );
 
   return node;
 }
