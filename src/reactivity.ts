@@ -42,11 +42,7 @@ export class EffectScope {
 
   run() {
     if (DEV) {
-      if (this.name) {
-        console.group(`${this.name}`);
-      } else {
-        console.group(`effect`);
-      }
+      console.group(this.name || "untrack");
     }
 
     const parentScope = currentScope;
@@ -139,11 +135,23 @@ export function createComputed<T>(value: T, update: (oldValue: T) => T) {
   return get;
 }
 
-export function untrack<T>(accessor: Accessor<T>): T {
+export function untrack<T>(
+  accessor: Accessor<T>,
+  options?: { name?: string }
+): T {
+  if (DEV) {
+    console.group(options?.name || "untrack");
+  }
+
   const parentScope = currentScope;
   currentScope = undefined;
   const value = accessor();
   currentScope = parentScope;
+
+  if (DEV) {
+    console.groupEnd();
+  }
+
   return value;
 }
 
