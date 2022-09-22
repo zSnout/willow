@@ -1,5 +1,5 @@
 import { WillowFragment } from "./fragment.js";
-import { Accessor, createEffect, ValueOrAccessor } from "./primitives.js";
+import { createEffect, ValueOrAccessor } from "./primitives.js";
 
 export function Maybe({
   when,
