@@ -224,6 +224,7 @@ declare global {
 
     interface DOMAttributes<T> extends BaseAttributes<T> {
       "children"?: Child;
+      "classList"?: Record<string, ValueOrAccessor<boolean>>;
 
       // Clipboard Events
       "on:copy"?: EventHandler<T, ClipboardEvent>;
