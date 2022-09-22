@@ -6,12 +6,12 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "npm run clear; npm run check && npm run build:file && npm run build:script && npm run build:types",
+    "build": "npm run clear; npm run check && npm run build:file && npm run build:scripts && npm run build:types",
     "build:file": "esbuild src/index.ts --outfile=dist/index.min.js --bundle --define:__DEV__=false --format=esm --minify",
-    "build:scripts": "esbuild src/**/* --outdir=dist --define:__DEV__=false --format=esm",
+    "build:scripts": "esbuild src/* --outdir=dist --define:__DEV__=false --format=esm",
     "build:types": "npx tsc --declaration --emitDeclarationOnly",
-    "check": "tsc -noEmit",
-    "clear": "rm dist/**/*.{js,d.ts}",
+    "check": "tsc --noEmit",
+    "clear": "rm dist/**/*.js; rm dist/**/*.d.ts",
     "dev": "tsc -w",
     "serve": "esbuild --servedir=./dist"
   },
