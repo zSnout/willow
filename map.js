@@ -1,6 +1,6 @@
 import { createEffect, createSignal } from "./primitives.js";
 import { createManualStore } from "./reactivity.js";
-function reactiveMap(list, fn, options) {
+function map(list, fn, options) {
   const cache = /* @__PURE__ */ new Map();
   const [result, update] = createManualStore([]);
   createEffect(() => {
@@ -26,5 +26,5 @@ function reactiveMap(list, fn, options) {
   return result;
 }
 export {
-  reactiveMap
+  map
 };
