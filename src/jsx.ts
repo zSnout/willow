@@ -1,4 +1,5 @@
 import { StandardProperties } from "csstype";
+import { MaybeAccessors } from "./accessors.js";
 import { WillowFragment } from "./fragment.js";
 import {
   createEffect,
@@ -6,7 +7,7 @@ import {
   isAccessor,
   Setter,
   Signal,
-} from "./reactivity.js";
+} from "./primitives.js";
 
 namespace Bindable {
   export function value([get, set]: Signal<string>) {
@@ -222,7 +223,7 @@ function fromClassLike(value: unknown): string {
 }
 
 type StyleValue =
-  | JSX.MaybeAccessors<StandardProperties>
+  | MaybeAccessors<StandardProperties>
   | string
   | (() => StyleValue);
 

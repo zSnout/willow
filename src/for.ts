@@ -1,6 +1,6 @@
 import { List } from "./list.js";
 import { reactiveMap } from "./map.js";
-import { Accessor } from "./reactivity.js";
+import { Accessor } from "./primitives.js";
 
 export function For<T>({
   children: fn,

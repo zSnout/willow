@@ -1,5 +1,5 @@
 import { WillowFragment } from "./fragment.js";
-import { createEffect, ValueOrAccessor } from "./reactivity.js";
+import { Accessor, createEffect, ValueOrAccessor } from "./primitives.js";
 
 export function Maybe({
   when,

@@ -1,5 +1,5 @@
 import { WillowFragment } from "./fragment.js";
-import { Accessor, createEffect } from "./reactivity.js";
+import { Accessor, createEffect } from "./primitives.js";
 
 export function Dynamic({
   children: get,

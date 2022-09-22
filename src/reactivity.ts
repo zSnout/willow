@@ -34,7 +34,7 @@ export function unref<T>(accessor: ValueOrAccessor<T>): T {
   if (isAccessor(accessor)) {
     return accessor();
   } else {
-    return accessor;
+    return accessor as any;
   }
 }
 

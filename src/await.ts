@@ -1,5 +1,6 @@
 import { WillowFragment } from "./fragment.js";
-import { createEffect, unref, ValueOrAccessor } from "./reactivity.js";
+import { createEffect, ValueOrAccessor } from "./primitives.js";
+import { unref } from "./reactivity.js";
 
 export function Await<T>({
   value,

@@ -1,11 +1,5 @@
-import {
-  Accessor,
-  createEffect,
-  createManualStore,
-  createSignal,
-  Setter,
-  untrack,
-} from "./reactivity.js";
+import { Accessor, createEffect, createSignal, Setter } from "./primitives.js";
+import { createManualStore } from "./reactivity.js";
 
 export function reactiveMap<T, U>(
   list: Iterable<T>,
