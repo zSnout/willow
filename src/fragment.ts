@@ -1,16 +1,19 @@
+const ael = "addEventListener";
+const lc = "lastChild";
+const s = "splice";
+const nes = "nextElementSibling";
+const ns = "nextSibling";
+const n = null;
+
 class WillowNodeList extends Array<ChildNode & NonDocumentTypeChildNode> {
   item(index: number): Node {
     return this[index];
   }
 
   namedItem(name: string): Node | null {
-    return this.find((value) => value.nodeName === name) || null;
+    return this.find((value) => value.nodeName == name) || n;
   }
 }
-
-const nes = "nextElementSibling";
-const ns = "nextSibling";
-const lc = "lastChild";
 
 export class WillowFragment extends Comment {
   after(...nodes: (string | Node)[]) {
@@ -54,11 +57,11 @@ export class WillowFragment extends Comment {
   }
 
   contains(other: Node | null): boolean {
-    return this === other || this.n.some((node) => node.contains(other));
+    return this == other || this.n.some((node) => node.contains(other));
   }
 
   get firstChild() {
-    return this.n[0] || null;
+    return this.n[0] || n;
   }
 
   hasChildNodes() {
@@ -67,15 +70,15 @@ export class WillowFragment extends Comment {
 
   insertBefore<T extends Node>(node: T, child: Node | null) {
     const index = this.n.indexOf(child as any);
-    if (index === -1) return node;
+    if (index == -1) return node;
 
-    this.n.splice(index, 0, node as any);
+    this.n[s](index, 0, node as any);
     this.r();
     return node;
   }
 
   get [lc]() {
-    return this.n.at(-1) || null;
+    return this.n.at(-1) || n;
   }
 
   get [nes]() {
@@ -101,25 +104,25 @@ export class WillowFragment extends Comment {
 
   removeChild<T extends Node>(child: T) {
     const index = this.n.indexOf(child as any);
-    if (index === -1) return child;
+    if (index == -1) return child;
 
-    this.n.splice(index, 1);
+    this.n[s](index, 1);
     this.r();
     return child;
   }
 
   replaceChild<T extends Node>(node: Node, child: T) {
     const index = this.n.indexOf(node as any);
-    if (index === -1) return child;
+    if (index == -1) return child;
 
-    this.n.splice(index, 1, child as any);
+    this.n[s](index, 1, child as any);
     this.r();
     return child;
   }
 
   setTo(...nodes: (Node | null | undefined)[]) {
     this.u();
-    this.n.splice(0, this.n.length, ...(nodes.filter((x) => x) as any));
+    this.n[s](0, this.n.length, ...(nodes.filter((x) => x) as any));
     this.r();
   }
 
@@ -136,12 +139,12 @@ export class WillowFragment extends Comment {
     super();
     this.data = ` ${name} `;
 
-    this.addEventListener("DOMNodeInserted", (event) => {
+    this[ael]("DOMNodeInserted", (event) => {
       if (event.target != this) return;
       this.r();
     });
 
-    this.addEventListener("DOMNodeRemoved", (event) => {
+    this[ael]("DOMNodeRemoved", (event) => {
       if (event.target != this) return;
       this.u();
     });
