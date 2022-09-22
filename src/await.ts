@@ -12,7 +12,7 @@ export function Await<T>({
   pending?: JSX.Element;
   then?: (value: Awaited<T>) => JSX.Element;
   catch?: (error: unknown) => JSX.Element;
-}) {
+}): JSX.Element {
   const fragment = new WillowFragment("Await");
   let asyncId = 0;
 
