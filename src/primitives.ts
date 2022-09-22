@@ -2,8 +2,10 @@ import { devLog, endDevScope, startDevScope } from "./dev-log.js";
 
 export type Accessor<T> = () => T;
 export type Setter<T> = (value: T) => void;
+export type Updater<T> = (update: (oldValue: T) => T) => void;
+export type SetterOrUpdater<T> = Setter<T> & Updater<T>;
 export type ValueOrAccessor<T> = T | Accessor<T>;
-export type Signal<T> = [get: Accessor<T>, set: Setter<T>];
+export type Signal<T> = [get: Accessor<T>, set: Setter<T> & Updater<T>];
 export type Effect = () => void;
 
 let currentScope: EffectScope | undefined;
@@ -81,10 +83,15 @@ export function createSignal<T>(
     return value!;
   };
 
-  const set: Setter<T> = (val: T) => {
+  const set: SetterOrUpdater<T> = (val: T | ((oldValue: T) => T)) => {
     if (__DEV__) devLog("signal", "set", options?.name);
 
-    value = val;
+    if (typeof val === "function") {
+      value = (val as any)(value);
+    } else {
+      value = val;
+    }
+
     tracking.forEach((effect) => effect.run());
   };
 
