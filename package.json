@@ -8,7 +8,7 @@
     "dev": "tsc -w",
     "serve": "esbuild --servedir=./dist",
     "minify": "esbuild src/**/* --outdir=dist --minify",
-    "bundle": "esbuild src/index.ts --outfile=dist/willow.js --bundle --define:DEV=false --format=esm --minify"
+    "bundle": "esbuild src/index.ts --outfile=dist/willow.js --bundle --define:__DEV__=false --format=esm --minify"
   },
   "author": "",
   "license": "GPL-3.0",
