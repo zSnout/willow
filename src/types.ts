@@ -224,7 +224,7 @@ declare global {
       | undefined;
 
     interface DOMAttributes<T> extends BaseAttributes<T> {
-      children?: Child;
+      "children"?: Child;
 
       // Clipboard Events
       "on:copy"?: EventHandler<T, ClipboardEvent>;
@@ -806,6 +806,4 @@ declare global {
       zoomAndPan?: ValueOrAccessor<string | undefined>;
     }
   }
-
-  var DEV: boolean | undefined;
 }
