@@ -10,7 +10,7 @@ const [age, setAge] = createSignal(14, { name: "age" });
 const [name, setName] = createSignal("Zachary", { name: "name" });
 const plural = createMemo(() => (age() === 1 ? "" : "s"), { name: "plural" });
 const isPlural = createMemo(() => age() !== 1, { name: "isPlural" });
-const nums = createStore<number[]>([], { name: "number list" });
+const numbers = createStore<number[]>([], { name: "number list" });
 
 function wait() {
   return new Promise<any>((resolve, reject) => {
@@ -49,7 +49,9 @@ function NumberCard(number: number, index: Accessor<number>) {
 
       <p>{Math.random()}</p>
 
-      <button on:click={() => nums.splice(untrack(index), 1)}>remove it</button>
+      <button on:click={() => numbers.splice(untrack(index), 1)}>
+        remove it
+      </button>
 
       <Await
         value={makeWaitSignal()}
@@ -89,19 +91,21 @@ document.body.appendChild(
 
     <Dynamic>{quote}</Dynamic>
 
-    <button on:click={() => nums.push(Math.random())}>add at end</button>
+    <button on:click={() => numbers.push(Math.random())}>add at end</button>
 
     <br />
 
-    <button on:click={() => nums.unshift(Math.random())}>add at front</button>
+    <button on:click={() => numbers.unshift(Math.random())}>
+      add at front
+    </button>
 
     <br />
 
     <button
       on:click={() => {
-        const index = Math.floor(nums.length * Math.random());
+        const index = Math.floor(numbers.length * Math.random());
         console.log(index);
-        nums.splice(index, 1);
+        numbers.splice(index, 1);
       }}
     >
       remove at random
@@ -114,7 +118,7 @@ document.body.appendChild(
         gap: "0.5em",
       }}
     >
-      <For each={nums}>{NumberCard}</For>
+      <For each={numbers}>{NumberCard}</For>
     </div>
   </>
 );
