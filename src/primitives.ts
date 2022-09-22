@@ -3,7 +3,7 @@ import { devLog, endDevScope, startDevScope } from "./dev-log.js";
 export type Accessor<T> = () => T;
 export type Setter<T> = (value: T) => void;
 export type Updater<T> = (update: (oldValue: T) => T) => void;
-export type SetterOrUpdater<T> = Setter<T> & Updater<T>;
+export type SetterAndUpdater<T> = Setter<T> & Updater<T>;
 export type ValueOrAccessor<T> = T | Accessor<T>;
 export type Signal<T> = [get: Accessor<T>, set: Setter<T> & Updater<T>];
 export type Effect = () => void;
@@ -83,7 +83,7 @@ export function createSignal<T>(
     return value!;
   };
 
-  const set: SetterOrUpdater<T> = (val: T | ((oldValue: T) => T)) => {
+  const set: SetterAndUpdater<T> = (val: T | ((oldValue: T) => T)) => {
     if (__DEV__) devLog("signal", "set", options?.name);
 
     if (typeof val === "function") {
