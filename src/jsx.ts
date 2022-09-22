@@ -358,7 +358,7 @@ const propsSymbol = Symbol("willow.propsSymbol");
 export abstract class WillowElement<T extends JSX.Props = JSX.Props> {
   static of<T extends JSX.Props>(
     render: (self: WillowElement<T>, props: T) => JSX.Element
-  ) {
+  ): typeof WillowElement<T> {
     return class extends WillowElement<T> {
       render(props: T): JSX.Element {
         return render(this, props);
@@ -368,7 +368,7 @@ export abstract class WillowElement<T extends JSX.Props = JSX.Props> {
 
   node: ChildNode;
 
-  private [propsSymbol]!: T;
+  [propsSymbol]!: T;
 
   /** listeners */
   private l: Record<string, ((data?: any) => void) | undefined> = {};
