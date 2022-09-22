@@ -4,13 +4,13 @@ export function devLog(type: string, action: string, name: string | undefined) {
   }
 }
 
-export function startScope(name: string | undefined) {
+export function startDevScope(name: string | undefined) {
   if (__DEV__ && name) {
     console.group(name);
   }
 }
 
-export function endScope(name: string | undefined) {
+export function endDevScope(name: string | undefined) {
   if (__DEV__ && name) {
     console.groupEnd();
   }
