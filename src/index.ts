@@ -5,6 +5,7 @@ export * from "./await.js";
 export * from "./dynamic.js";
 export * from "./for.js";
 export * from "./fragment.js";
+export * from "./jsx-runtime.js";
 export * from "./jsx.js";
 export * from "./list.js";
 export * from "./map.js";
