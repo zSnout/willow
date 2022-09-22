@@ -2,17 +2,17 @@
   "name": "@zsnout/willow",
   "version": "0.1.0",
   "description": "Willow is a reactive web framework that enables JSX syntax, compiles to DOM nodes, and omits a virtual DOM.",
-  "main": "dist/willow.js",
-  "types": "dist/willow.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "npm run clear-dist; tsc --noEmit && npm run build-types && npm run bundle",
-    "build-types": "npx tsc --declaration --emitDeclarationOnly --outFile dist/willow.d.ts",
+    "build-types": "npx tsc --declaration --emitDeclarationOnly --outFile dist/index.d.ts",
     "clear-dist": "rm dist/**/*.{js,d.ts}",
     "dev": "tsc -w",
     "serve": "esbuild --servedir=./dist",
     "minify": "esbuild src/**/* --outdir=dist --minify",
-    "bundle": "esbuild src/index.ts --outfile=dist/willow.js --bundle --define:__DEV__=false --format=esm --minify"
+    "bundle": "esbuild src/index.ts --outfile=dist/index.js --bundle --define:__DEV__=false --format=esm --minify"
   },
   "author": "",
   "license": "GPL-3.0",
