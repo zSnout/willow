@@ -8,6 +8,7 @@ import {
   Setter,
   Signal,
 } from "./primitives.js";
+import { unref } from "./reactivity.js";
 
 namespace Bindable {
   export function value([get, set]: Signal<string>) {
@@ -259,7 +260,7 @@ export function h(
 ): JSX.Element {
   if (typeof tag === "string") {
     const el = element(tag);
-    appendReactive(el, children as JSX.Child);
+    appendReactive(el, (props?.children || children) as JSX.Child);
 
     for (const key in props) {
       const value = props[key];
@@ -278,6 +279,13 @@ export function h(
           el.className = fromClassLike(value);
         }
       } else if (key === "classList") {
+        for (const name in value) {
+          addNodeEffect(
+            el,
+            () => el.classList.toggle(name, !!unref(value[name])),
+            { name: `classList.${name}` }
+          );
+        }
       } else if (key === "use") {
         if (typeof value === "function") {
           value(el);
