@@ -6,13 +6,14 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "npm run clear-dist; tsc --noEmit && npm run build-types && npm run bundle",
-    "build-types": "npx tsc --declaration --emitDeclarationOnly --outFile dist/index.d.ts",
-    "clear-dist": "rm dist/**/*.{js,d.ts}",
+    "build": "npm run clear; npm run check && npm run build:file && npm run build:script && npm run build:types",
+    "build:file": "esbuild src/index.ts --outfile=dist/index.min.js --bundle --define:__DEV__=false --format=esm --minify",
+    "build:scripts": "esbuild src/**/* --outdir=dist --define:__DEV__=false --format=esm",
+    "build:types": "npx tsc --declaration --emitDeclarationOnly",
+    "check": "tsc -noEmit",
+    "clear": "rm dist/**/*.{js,d.ts}",
     "dev": "tsc -w",
-    "serve": "esbuild --servedir=./dist",
-    "minify": "esbuild src/**/* --outdir=dist --minify",
-    "bundle": "esbuild src/index.ts --outfile=dist/index.js --bundle --define:__DEV__=false --format=esm --minify"
+    "serve": "esbuild --servedir=./dist"
   },
   "author": "",
   "license": "GPL-3.0",
