@@ -3,19 +3,14 @@ import { Dynamic } from "../dynamic.js";
 import { For } from "../for.js";
 import { h } from "../jsx.js";
 import { Maybe } from "../maybe.js";
-import {
-  Accessor,
-  createMemo,
-  createReactive,
-  createSignal,
-  untrack,
-} from "../reactivity.js";
+import { Accessor, createSignal, untrack } from "../primitives.js";
+import { createMemo, createStore } from "../reactivity.js";
 
 const [age, setAge] = createSignal(14, { name: "age" });
 const [name, setName] = createSignal("Zachary", { name: "name" });
 const plural = createMemo(() => (age() === 1 ? "" : "s"), { name: "plural" });
 const isPlural = createMemo(() => age() !== 1, { name: "isPlural" });
-const nums = createReactive<number[]>([], { name: "number list" });
+const nums = createStore<number[]>([], { name: "number list" });
 
 function wait() {
   return new Promise<any>((resolve, reject) => {

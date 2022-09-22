@@ -1,7 +1,7 @@
 import {
   Accessor,
   createEffect,
-  createManualReactive,
+  createManualStore,
   createSignal,
   Setter,
   untrack,
@@ -17,7 +17,7 @@ export function reactiveMap<T, U>(
     [value: U, index: number, setIndex: Setter<number>]
   >();
 
-  const [result, update] = createManualReactive<U[]>([]);
+  const [result, update] = createManualStore<U[]>([]);
 
   createEffect(() => {
     let index = -1;
