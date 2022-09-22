@@ -1,4 +1,0 @@
-import { h } from "./willow.js";
-
-export { h as jsx };
-export const Fragment = h.f;
