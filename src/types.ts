@@ -5,7 +5,8 @@
  */
 
 import { StandardProperties } from "csstype";
-import { EffectScope, Setter, ValueOrAccessor } from "./reactivity.js";
+import { MaybeAccessors } from "./accessors.js";
+import { EffectScope, Setter, ValueOrAccessor } from "./primitives.js";
 
 declare global {
   interface Node {
@@ -13,8 +14,6 @@ declare global {
   }
 
   namespace JSX {
-    type MaybeAccessors<T> = { [K in keyof T]: ValueOrAccessor<T[K]> };
-
     interface Element extends ChildNode {}
 
     interface ElementChildrenAttribute {
