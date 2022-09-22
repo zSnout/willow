@@ -6,7 +6,9 @@
   "types": "dist/willow.d.ts",
   "type": "module",
   "scripts": {
-    "build": "tsc -b && npm run bundle",
+    "build": "npm run clear-dist; tsc --noEmit && npm run build-types && npm run bundle",
+    "build-types": "npx tsc --declaration --emitDeclarationOnly --outFile dist/willow.d.ts",
+    "clear-dist": "rm dist/**/*.{js,d.ts}",
     "dev": "tsc -w",
     "serve": "esbuild --servedir=./dist",
     "minify": "esbuild src/**/* --outdir=dist --minify",
