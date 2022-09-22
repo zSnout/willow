@@ -15,7 +15,7 @@
     "dev": "tsc -w",
     "serve": "esbuild --servedir=./dist"
   },
-  "author": "",
+  "author": "Zachary Sakowitz",
   "license": "GPL-3.0",
   "devDependencies": {
     "csstype": "^3.1.1",
