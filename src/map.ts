@@ -1,7 +1,7 @@
 import { Accessor, createEffect, createSignal, Setter } from "./primitives.js";
 import { createManualStore } from "./reactivity.js";
 
-export function reactiveMap<T, U>(
+export function map<T, U>(
   list: Iterable<T>,
   fn: (value: T, index: Accessor<number>) => U,
   options?: { name?: string }

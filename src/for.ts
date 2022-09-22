@@ -1,5 +1,5 @@
 import { List } from "./list.js";
-import { reactiveMap } from "./map.js";
+import { map } from "./map.js";
 import { Accessor } from "./primitives.js";
 
 export function For<T>({
@@ -10,6 +10,6 @@ export function For<T>({
   each: Iterable<T>;
 }) {
   return List({
-    children: reactiveMap(each, fn, { name: "<For>" }),
+    children: map(each, fn, { name: "<For>" }),
   });
 }
