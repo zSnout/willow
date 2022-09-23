@@ -7,6 +7,7 @@ import {
   EffectScope,
   getScope,
   isAccessor,
+  Updater,
   ValueOrAccessor,
 } from "./primitives.js";
 
@@ -24,9 +25,17 @@ export function createMemo<T>(
   return get;
 }
 
-export function createComputed<T>(value: T, update: (oldValue: T) => T) {
+export function createComputed<T>(
+  update: Updater<T | undefined, T>
+): Accessor<T>;
+export function createComputed<T>(value: T, update: Updater<T>): Accessor<T>;
+export function createComputed<T>(value: T, update?: (oldValue: T) => T) {
+  if (typeof value === "function") {
+    [value, update] = [undefined, value] as any;
+  }
+
   const [get, set] = createSignal<T>(0 as any);
-  createEffect(() => set((value = update(value))));
+  createEffect(() => set((value = update!(value))));
   return get;
 }
 
