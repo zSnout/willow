@@ -5,7 +5,7 @@ export function map<T, U>(
   list: Iterable<T>,
   fn: (value: T, index: Accessor<number>) => U,
   options?: { name?: string }
-) {
+): readonly U[] {
   const cache = new Map<
     T,
     [value: U, index: number, setIndex: Setter<number>]
