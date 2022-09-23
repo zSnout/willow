@@ -1,6 +1,7 @@
 import { StandardProperties } from "csstype";
 import { MaybeAccessors } from "./accessors.js";
 import { WillowFragment } from "./fragment.js";
+import { Maybe } from "./maybe.js";
 import {
   createEffect,
   Effect,
@@ -253,18 +254,40 @@ function setStyles(
   }
 }
 
+export function h<P extends JSX.Props>(
+  tag: JSX.FcOrCc<P>,
+  props: P
+): JSX.Element;
+export function h<P extends JSX.Props>(
+  tag: JSX.FcOrCc<P>,
+  props: Omit<P, "children">,
+  ...children: P["children"] extends undefined
+    ? []
+    : P["children"] extends any[]
+    ? P["children"]
+    : [P["children"]]
+): JSX.Element;
+export function h<
+  K extends keyof JSX.IntrinsicElements & keyof HTMLElementTagNameMap
+>(
+  tag: K,
+  props?: JSX.IntrinsicElements[K] | null,
+  ...children: JSX.Child[]
+): HTMLElementTagNameMap[K];
+export function h<
+  K extends keyof JSX.IntrinsicElements & keyof SVGElementTagNameMap
+>(
+  tag: K,
+  props?: JSX.IntrinsicElements[K] | null,
+  ...children: JSX.Child[]
+): SVGElementTagNameMap[K];
 export function h<K extends keyof JSX.IntrinsicElements>(
   tag: K,
   props?: JSX.IntrinsicElements[K] | null,
   ...children: JSX.Child[]
 ): JSX.Element;
-export function h<P extends JSX.Props & { children: C }, C extends unknown[]>(
-  tag: JSX.FC<P> | JSX.CC<P>,
-  props?: P | null,
-  ...children: C
-): JSX.Element;
 export function h(
-  tag: string | JSX.FC<JSX.Props> | JSX.CC<JSX.Props>,
+  tag: string | JSX.FcOrCc<JSX.Props>,
   props?: JSX.Props | null,
   ...children: unknown[]
 ): JSX.Element {
@@ -451,5 +474,6 @@ declare global {
 
     type FC<T extends Props> = (props: T) => Element;
     type CC<T extends Props> = typeof WillowElement<T>;
+    type FcOrCc<T extends Props> = FC<T> | CC<T>;
   }
 }
