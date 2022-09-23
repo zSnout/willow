@@ -2,7 +2,7 @@ import { devLog, endDevScope, startDevScope } from "./dev-log.js";
 
 export type Accessor<T> = () => T;
 export type Setter<T> = (value: T) => void;
-export type Updater<T> = (update: (oldValue: T) => T) => void;
+export type Updater<I, O = I> = (update: (oldValue: I) => O) => void;
 export type SetterAndUpdater<T> = Setter<T> & Updater<T>;
 export type ValueOrAccessor<T> = [T] extends [Accessor<infer U>]
   ? U | Accessor<U>
