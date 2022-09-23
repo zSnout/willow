@@ -1,7 +1,6 @@
 import { StandardProperties } from "csstype";
 import { MaybeAccessors } from "./accessors.js";
 import { WillowFragment } from "./fragment.js";
-import { Maybe } from "./maybe.js";
 import {
   createEffect,
   Effect,
@@ -261,11 +260,7 @@ export function h<P extends JSX.Props>(
 export function h<P extends JSX.Props>(
   tag: JSX.FcOrCc<P>,
   props: Omit<P, "children">,
-  ...children: P["children"] extends undefined
-    ? []
-    : P["children"] extends any[]
-    ? P["children"]
-    : [P["children"]]
+  ...children: JSX.ChildrenAsArray<P>
 ): JSX.Element;
 export function h<
   K extends keyof JSX.IntrinsicElements & keyof HTMLElementTagNameMap
@@ -475,5 +470,11 @@ declare global {
     type FC<T extends Props> = (props: T) => Element;
     type CC<T extends Props> = typeof WillowElement<T>;
     type FcOrCc<T extends Props> = FC<T> | CC<T>;
+
+    type ChildrenAsArray<T> = T extends undefined
+      ? []
+      : T extends any[]
+      ? T
+      : [T];
   }
 }
