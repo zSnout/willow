@@ -1,6 +1,6 @@
 export declare type Accessor<T> = () => T;
 export declare type Setter<T> = (value: T) => void;
-export declare type Updater<T> = (update: (oldValue: T) => T) => void;
+export declare type Updater<I, O = I> = (update: (oldValue: I) => O) => void;
 export declare type SetterAndUpdater<T> = Setter<T> & Updater<T>;
 export declare type ValueOrAccessor<T> = [T] extends [Accessor<infer U>] ? U | Accessor<U> : T | Accessor<T>;
 export declare type Signal<T> = [get: Accessor<T>, set: Setter<T> & Updater<T>];

@@ -11,8 +11,9 @@ declare namespace Bindable {
     export {};
 }
 export declare type ClassLike = string | ClassLike[] | Record<string, boolean> | undefined | null;
-export declare function h<P extends JSX.Props>(tag: JSX.FcOrCc<P>, props: P): JSX.Element;
-export declare function h<P extends JSX.Props>(tag: JSX.FcOrCc<P>, props: Omit<P, "children">, ...children: JSX.ChildrenAsArray<P>): JSX.Element;
+export declare function h(component: () => JSX.Element): JSX.Element;
+export declare function h<P extends JSX.Props>(component: JSX.FcOrCc<P>, props: P): JSX.Element;
+export declare function h<P extends JSX.Props>(component: JSX.FcOrCc<P>, props: Omit<P, "children">, ...children: JSX.ChildrenAsArray<P>): JSX.Element;
 export declare function h<K extends keyof JSX.IntrinsicElements & keyof HTMLElementTagNameMap>(tag: K, props?: JSX.IntrinsicElements[K] | null, ...children: JSX.Child[]): HTMLElementTagNameMap[K];
 export declare function h<K extends keyof JSX.IntrinsicElements & keyof SVGElementTagNameMap>(tag: K, props?: JSX.IntrinsicElements[K] | null, ...children: JSX.Child[]): SVGElementTagNameMap[K];
 export declare function h<K extends keyof JSX.IntrinsicElements>(tag: K, props?: JSX.IntrinsicElements[K] | null, ...children: JSX.Child[]): JSX.Element;
@@ -41,7 +42,7 @@ declare global {
         interface Props {
             [name: string]: any;
             [bindable: `bind:${string}`]: Signal<any>;
-            [event: `on:${string}`]: ((value: any) => void) | (() => void);
+            [event: `on:${string}`]: (...data: any[]) => void;
             [slot: `slot:${string}`]: JSX.Element | ((...args: any) => JSX.Element);
             children?: any;
             use?: Setter<JSX.Element>;

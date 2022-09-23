@@ -14,6 +14,9 @@ function createMemo(update, options) {
   return get;
 }
 function createComputed(value, update) {
+  if (typeof value === "function") {
+    [value, update] = [void 0, value];
+  }
   const [get, set] = createSignal(0);
   createEffect(() => set(value = update(value)));
   return get;

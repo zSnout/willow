@@ -1,8 +1,9 @@
-import { Accessor, Effect, ValueOrAccessor } from "./primitives.js";
+import { Accessor, Effect, Updater, ValueOrAccessor } from "./primitives.js";
 export declare function createMemo<T>(update: Accessor<T>, options?: {
     name?: string;
 }): Accessor<T>;
-export declare function createComputed<T>(value: T, update: (oldValue: T) => T): Accessor<T>;
+export declare function createComputed<T>(update: Updater<T | undefined, T>): Accessor<T>;
+export declare function createComputed<T>(value: T, update: Updater<T>): Accessor<T>;
 export declare function unref<T>(accessor: ValueOrAccessor<T>): T;
 export declare function createStore<T extends object>(object: T, options?: {
     name?: string;
