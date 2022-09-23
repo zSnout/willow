@@ -253,6 +253,16 @@ function setStyles(
   }
 }
 
+export function h<K extends keyof JSX.IntrinsicElements>(
+  tag: K,
+  props?: JSX.IntrinsicElements[K] | null,
+  ...children: JSX.Child[]
+): JSX.Element;
+export function h<P extends JSX.Props & { children: C }, C extends unknown[]>(
+  tag: JSX.FC<P> | JSX.CC<P>,
+  props?: P | null,
+  ...children: C
+): JSX.Element;
 export function h(
   tag: string | JSX.FC<JSX.Props> | JSX.CC<JSX.Props>,
   props?: JSX.Props | null,
@@ -331,6 +341,8 @@ export function h(
       } else if (!props.children) {
         props = { ...props, children: actualChildren };
       }
+    } else if (!props) {
+      props = {};
     }
 
     let value: JSX.Element | JSX.ElementClass;
