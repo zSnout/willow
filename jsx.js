@@ -244,6 +244,8 @@ function h(tag, props, ...children) {
       } else if (!props.children) {
         props = { ...props, children: actualChildren };
       }
+    } else if (!props) {
+      props = {};
     }
     let value;
     try {

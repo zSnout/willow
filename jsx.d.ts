@@ -11,7 +11,11 @@ declare namespace Bindable {
     export {};
 }
 export declare type ClassLike = string | ClassLike[] | Record<string, boolean> | undefined | null;
-export declare function h(tag: string | JSX.FC<JSX.Props> | JSX.CC<JSX.Props>, props?: JSX.Props | null, ...children: unknown[]): JSX.Element;
+export declare function h<P extends JSX.Props>(tag: JSX.FcOrCc<P>, props: P): JSX.Element;
+export declare function h<P extends JSX.Props>(tag: JSX.FcOrCc<P>, props: Omit<P, "children">, ...children: JSX.ChildrenAsArray<P>): JSX.Element;
+export declare function h<K extends keyof JSX.IntrinsicElements & keyof HTMLElementTagNameMap>(tag: K, props?: JSX.IntrinsicElements[K] | null, ...children: JSX.Child[]): HTMLElementTagNameMap[K];
+export declare function h<K extends keyof JSX.IntrinsicElements & keyof SVGElementTagNameMap>(tag: K, props?: JSX.IntrinsicElements[K] | null, ...children: JSX.Child[]): SVGElementTagNameMap[K];
+export declare function h<K extends keyof JSX.IntrinsicElements>(tag: K, props?: JSX.IntrinsicElements[K] | null, ...children: JSX.Child[]): JSX.Element;
 export declare namespace h {
     function f({ children }: {
         children: JSX.Child;
@@ -50,6 +54,8 @@ declare global {
         }
         type FC<T extends Props> = (props: T) => Element;
         type CC<T extends Props> = typeof WillowElement<T>;
+        type FcOrCc<T extends Props> = FC<T> | CC<T>;
+        type ChildrenAsArray<T> = T extends undefined ? [] : T extends any[] ? T : [T];
     }
 }
 export {};
