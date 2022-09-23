@@ -1,6 +1,6 @@
 {
   "name": "@zsnout/willow",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Willow is a reactive web framework that enables JSX syntax, compiles to DOM nodes, and omits a virtual DOM.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
