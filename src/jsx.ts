@@ -255,11 +255,11 @@ function setStyles(
 
 export function h(component: () => JSX.Element): JSX.Element;
 export function h<P extends JSX.Props>(
-  component: JSX.FcOrCc<P>,
+  component: JSX.Component<P>,
   props: P
 ): JSX.Element;
 export function h<P extends JSX.Props>(
-  component: JSX.FcOrCc<P>,
+  component: JSX.Component<P>,
   props: Omit<P, "children">,
   ...children: JSX.ChildrenAsArray<P>
 ): JSX.Element;
@@ -283,10 +283,12 @@ export function h<K extends keyof JSX.IntrinsicElements>(
   ...children: JSX.Child[]
 ): JSX.Element;
 export function h(
-  tag: string | JSX.FcOrCc<JSX.Props>,
+  tag: string | JSX.Component<JSX.Props>,
   props?: JSX.Props | null,
   ...children: unknown[]
 ): JSX.Element {
+  let _el: ChildNode;
+
   if (typeof tag === "string") {
     const el = element(tag);
     appendReactive(el, (props?.children || children) as JSX.Child);
@@ -323,14 +325,8 @@ export function h(
         setStyles(el, value);
       } else if (key.startsWith("bind:")) {
         (Bindable as any)[key.slice(5)](value)(el);
-      } else if (key.startsWith("on:")) {
-        if (typeof value === "function") {
-          listen(el, key.slice(3), value as any);
-        }
-      } else if (key.startsWith("oncapture:")) {
-        if (typeof value === "function") {
-          listen(el, key.slice(10), value as any, true);
-        }
+      } else if (key.startsWith("on:") || key.startsWith("oncapture:")) {
+        // skip these for now
       } else if (key in el) {
         if (isAccessor(value)) {
           addNodeEffect(el, () => ((el as any)[key] = value()), {
@@ -350,7 +346,7 @@ export function h(
       }
     }
 
-    return el;
+    _el = el;
   } else if (typeof tag === "function") {
     const actualChildren = children.length === 1 ? children[0] : children;
 
@@ -371,16 +367,28 @@ export function h(
       value = new (tag as any)(props);
     }
 
-    if (value instanceof WillowElement) {
-      return value.node;
-    }
-
-    return value;
+    _el = value;
+  } else {
+    throw new TypeError(
+      `willow.h must be passed a tag name or function, but was passed a ${typeof tag}`
+    );
   }
 
-  throw new TypeError(
-    `willow.h must be passed a tag name or function, but was passed a ${typeof tag}`
-  );
+  for (const key in props) {
+    const value = props[key];
+
+    if (key.startsWith("on:")) {
+      if (typeof value === "function") {
+        listen(_el, key.slice(3), value as any);
+      }
+    } else if (key.startsWith("oncapture:")) {
+      if (typeof value === "function") {
+        listen(_el, key.slice(10), value as any, true);
+      }
+    }
+  }
+
+  return _el;
 }
 
 export namespace h {
@@ -394,52 +402,6 @@ export namespace h {
 
 const propsSymbol = Symbol("willow.propsSymbol");
 
-export abstract class WillowElement<T extends JSX.Props = JSX.Props> {
-  static of<T extends JSX.Props>(
-    render: (self: WillowElement<T>, props: T) => JSX.Element
-  ): typeof WillowElement<T> {
-    return class extends WillowElement<T> {
-      render(props: T): JSX.Element {
-        return render(this, props);
-      }
-    };
-  }
-
-  node: ChildNode;
-
-  [propsSymbol]!: T;
-
-  /** listeners */
-  private l: Record<string, ((data?: any) => void) | undefined> = {};
-
-  constructor(props: T) {
-    props = { ...props };
-
-    for (const key in props) {
-      if (key.startsWith("on:")) {
-        this.l[key.slice(3)] = props[key];
-      }
-    }
-
-    this.node = this.render(props);
-  }
-
-  cleanup() {
-    cleanupNode(this.node);
-    this.node.remove();
-    this.node = text("");
-  }
-
-  emit<K extends keyof T & `on:${string}`>(
-    type: K extends `on:${infer T}` ? T : never,
-    ...data: Parameters<T[K]>
-  ) {
-    this.l[type]?.(...data);
-  }
-
-  abstract render(props: T): JSX.Element;
-}
-
 export function cleanupNode(node: Node) {
   node.willowScopes?.forEach((scope) => scope.cleanup());
   node.childNodes.forEach(cleanupNode);
@@ -449,7 +411,7 @@ declare global {
   namespace JSX {
     type BindableFor<T> = Bindable.For<T>;
 
-    type ElementClass = Element | WillowElement<Props>;
+    type ElementClass = Element;
 
     interface Props {
       [name: string]: any;
@@ -468,9 +430,7 @@ declare global {
       children: {};
     }
 
-    type FC<T extends Props> = (props: T) => Element;
-    type CC<T extends Props> = typeof WillowElement<T>;
-    type FcOrCc<T extends Props> = FC<T> | CC<T>;
+    type Component<T extends Props> = (props: T) => Element;
 
     type ChildrenAsArray<T> = T extends undefined
       ? []
