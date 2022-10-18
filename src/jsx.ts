@@ -331,21 +331,21 @@ export function h(
         if (typeof value === "function") {
           listen(el, key.slice(10), value as any, true);
         }
-      } else if (key.includes("-")) {
-        if (isAccessor(value)) {
-          addNodeEffect(el, () => attr(el, key, value()), {
-            name: `element attribute ${key}`,
-          });
-        } else {
-          attr(el, key, value);
-        }
-      } else {
+      } else if (key in el) {
         if (isAccessor(value)) {
           addNodeEffect(el, () => ((el as any)[key] = value()), {
             name: `element property ${key}`,
           });
         } else {
           (el as any)[key] = value;
+        }
+      } else {
+        if (isAccessor(value)) {
+          addNodeEffect(el, () => attr(el, key, value()), {
+            name: `element attribute ${key}`,
+          });
+        } else {
+          attr(el, key, value);
         }
       }
     }
