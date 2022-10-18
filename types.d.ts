@@ -110,6 +110,7 @@ declare global {
             script: HTMLAttributes<HTMLElement>;
             section: HTMLAttributes<HTMLElement>;
             select: HTMLAttributes<HTMLSelectElement>;
+            slot: HTMLAttributes<HTMLSlotElement>;
             small: HTMLAttributes<HTMLElement>;
             source: HTMLAttributes<HTMLSourceElement>;
             span: HTMLAttributes<HTMLSpanElement>;

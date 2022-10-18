@@ -12,8 +12,8 @@ declare namespace Bindable {
 }
 export declare type ClassLike = string | ClassLike[] | Record<string, boolean> | undefined | null;
 export declare function h(component: () => JSX.Element): JSX.Element;
-export declare function h<P extends JSX.Props>(component: JSX.FcOrCc<P>, props: P): JSX.Element;
-export declare function h<P extends JSX.Props>(component: JSX.FcOrCc<P>, props: Omit<P, "children">, ...children: JSX.ChildrenAsArray<P>): JSX.Element;
+export declare function h<P extends JSX.Props>(component: JSX.Component<P>, props: P): JSX.Element;
+export declare function h<P extends JSX.Props>(component: JSX.Component<P>, props: Omit<P, "children">, ...children: JSX.ChildrenAsArray<P>): JSX.Element;
 export declare function h<K extends keyof JSX.IntrinsicElements & keyof HTMLElementTagNameMap>(tag: K, props?: JSX.IntrinsicElements[K] | null, ...children: JSX.Child[]): HTMLElementTagNameMap[K];
 export declare function h<K extends keyof JSX.IntrinsicElements & keyof SVGElementTagNameMap>(tag: K, props?: JSX.IntrinsicElements[K] | null, ...children: JSX.Child[]): SVGElementTagNameMap[K];
 export declare function h<K extends keyof JSX.IntrinsicElements>(tag: K, props?: JSX.IntrinsicElements[K] | null, ...children: JSX.Child[]): JSX.Element;
@@ -23,22 +23,11 @@ export declare namespace h {
     }): WillowFragment;
 }
 declare const propsSymbol: unique symbol;
-export declare abstract class WillowElement<T extends JSX.Props = JSX.Props> {
-    static of<T extends JSX.Props>(render: (self: WillowElement<T>, props: T) => JSX.Element): typeof WillowElement<T>;
-    node: ChildNode;
-    [propsSymbol]: T;
-    /** listeners */
-    private l;
-    constructor(props: T);
-    cleanup(): void;
-    emit<K extends keyof T & `on:${string}`>(type: K extends `on:${infer T}` ? T : never, ...data: Parameters<T[K]>): void;
-    abstract render(props: T): JSX.Element;
-}
 export declare function cleanupNode(node: Node): void;
 declare global {
     namespace JSX {
         type BindableFor<T> = Bindable.For<T>;
-        type ElementClass = Element | WillowElement<Props>;
+        type ElementClass = Element;
         interface Props {
             [name: string]: any;
             [bindable: `bind:${string}`]: Signal<any>;
@@ -53,9 +42,7 @@ declare global {
         interface ElementChildrenAttribute {
             children: {};
         }
-        type FC<T extends Props> = (props: T) => Element;
-        type CC<T extends Props> = typeof WillowElement<T>;
-        type FcOrCc<T extends Props> = FC<T> | CC<T>;
+        type Component<T extends Props> = (props: T) => Element;
         type ChildrenAsArray<T> = T extends undefined ? [] : T extends any[] ? T : [T];
     }
 }

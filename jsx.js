@@ -178,6 +178,7 @@ function setStyles(element2, value) {
   }
 }
 function h(tag, props, ...children) {
+  let _el;
   if (typeof tag === "string") {
     const el = element(tag);
     appendReactive(el, props?.children || children);
@@ -209,23 +210,8 @@ function h(tag, props, ...children) {
         setStyles(el, value);
       } else if (key.startsWith("bind:")) {
         Bindable[key.slice(5)](value)(el);
-      } else if (key.startsWith("on:")) {
-        if (typeof value === "function") {
-          listen(el, key.slice(3), value);
-        }
-      } else if (key.startsWith("oncapture:")) {
-        if (typeof value === "function") {
-          listen(el, key.slice(10), value, true);
-        }
-      } else if (key.includes("-")) {
-        if (isAccessor(value)) {
-          addNodeEffect(el, () => attr(el, key, value()), {
-            name: `element attribute ${key}`
-          });
-        } else {
-          attr(el, key, value);
-        }
-      } else {
+      } else if (key.startsWith("on:") || key.startsWith("oncapture:")) {
+      } else if (key in el) {
         if (isAccessor(value)) {
           addNodeEffect(el, () => el[key] = value(), {
             name: `element property ${key}`
@@ -233,9 +219,17 @@ function h(tag, props, ...children) {
         } else {
           el[key] = value;
         }
+      } else {
+        if (isAccessor(value)) {
+          addNodeEffect(el, () => attr(el, key, value()), {
+            name: `element attribute ${key}`
+          });
+        } else {
+          attr(el, key, value);
+        }
       }
     }
-    return el;
+    _el = el;
   } else if (typeof tag === "function") {
     const actualChildren = children.length === 1 ? children[0] : children;
     if (children.length) {
@@ -253,14 +247,25 @@ function h(tag, props, ...children) {
     } catch {
       value = new tag(props);
     }
-    if (value instanceof WillowElement) {
-      return value.node;
-    }
-    return value;
+    _el = value;
+  } else {
+    throw new TypeError(
+      `willow.h must be passed a tag name or function, but was passed a ${typeof tag}`
+    );
   }
-  throw new TypeError(
-    `willow.h must be passed a tag name or function, but was passed a ${typeof tag}`
-  );
+  for (const key in props) {
+    const value = props[key];
+    if (key.startsWith("on:")) {
+      if (typeof value === "function") {
+        listen(_el, key.slice(3), value);
+      }
+    } else if (key.startsWith("oncapture:")) {
+      if (typeof value === "function") {
+        listen(_el, key.slice(10), value, true);
+      }
+    }
+  }
+  return _el;
 }
 ((h2) => {
   function f({ children }) {
@@ -271,41 +276,11 @@ function h(tag, props, ...children) {
   h2.f = f;
 })(h || (h = {}));
 const propsSymbol = Symbol("willow.propsSymbol");
-class WillowElement {
-  static of(render) {
-    return class extends WillowElement {
-      render(props) {
-        return render(this, props);
-      }
-    };
-  }
-  node;
-  [propsSymbol];
-  l = {};
-  constructor(props) {
-    props = { ...props };
-    for (const key in props) {
-      if (key.startsWith("on:")) {
-        this.l[key.slice(3)] = props[key];
-      }
-    }
-    this.node = this.render(props);
-  }
-  cleanup() {
-    cleanupNode(this.node);
-    this.node.remove();
-    this.node = text("");
-  }
-  emit(type, ...data) {
-    this.l[type]?.(...data);
-  }
-}
 function cleanupNode(node) {
   node.willowScopes?.forEach((scope) => scope.cleanup());
   node.childNodes.forEach(cleanupNode);
 }
 export {
-  WillowElement,
   cleanupNode,
   h
 };
