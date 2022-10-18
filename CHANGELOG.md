@@ -1,3 +1,78 @@
+# Web Components - 0.4.1 (October 18, 2022)
+
+The old WillowElement component has been removed. Instead, we have a new shadow
+DOM based component: WillowElement (v2)!
+
+## Replaced Classes
+
+### `WillowElement`
+
+is a custom element constructor and provides shadow root functionality. To use
+it, you must create a subclass and provide a `render` method that returns a DOM
+node. To get the value of existing attributes, use the `.attribute()` method.
+
+```ts
+export abstract class WillowElement extends HTMLElement {
+  static observedAttributes?: readonly string[];
+
+  connectedCallback?(): void;
+  disconnectedCallback?(): void;
+  adoptedCallback?(): void;
+
+  styles?: string | Accessor<string>;
+
+  shadowRoot: ShadowRoot;
+
+  constructor();
+
+  abstract render(): JSX.Element;
+
+  attribute(name: string): Accessor<string | undefined>;
+  attribute<T extends number>(name: string, defaultValue: T): Accessor<T>;
+  attribute<T extends string>(name: string, defaultValue: T): Accessor<T>;
+  attribute<T extends boolean>(name: string, defaultValue: T): Accessor<T>;
+}
+```
+
+#### `static WillowElement.observedAttributes` (overridable)
+
+is a list of attributes that should be watched by the DOM. See `.attribute()`
+for more information.
+
+#### `new WillowElement`
+
+constructs a new component. This will create a shadow root, append a `<style>`
+element with the content of the `.styles` property, call the `.render()` method,
+and append its return value (if any) to the shadow root.
+
+#### `WillowElement.adoptedCallback` (overridable)
+
+is called when the element's parent node is changed.
+
+#### `WillowElement.attribute`
+
+creates an `Accessor` that reflects the value of a given attribute. If the
+attribute's name is in `observedAttributes`, the accessor will update when the
+corresponding attribute is changed. It accepts a default value and will force
+the accessor's type to match the default value's. If no default value is passed,
+the accessor will return a string or `undefined`.
+
+#### `WillowElement.connectedCallback` (overridable)
+
+is called when the element is appended to the DOM.
+
+#### `WillowElement.disconnectedCallback` (overridable)
+
+is called when the element is removed from the DOM.
+
+#### `WillowElement.shadowRoot`
+
+contains the shadow root with this element's content.
+
+#### `WillowElement.styles` (overridable)
+
+has a string or `Accessor<string>` to the scoped styles for this custom element.
+
 # Initial Release - 0.3.6 (September 22, 2022)
 
 0.3.6 brings our biggest update yet. I mean, we could add nothing and it'd be
