@@ -19,7 +19,7 @@ export abstract class WillowElement extends HTMLElement {
   disconnectedCallback?(): void;
   adoptedCallback?(): void;
 
-  styles?: string | Accessor<string>;
+  styles?(): string;
 
   shadowRoot: ShadowRoot;
 

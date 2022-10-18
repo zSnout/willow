@@ -7,8 +7,7 @@ export abstract class WillowElement extends HTMLElement {
   connectedCallback?(): void;
   disconnectedCallback?(): void;
   adoptedCallback?(): void;
-
-  styles?: string | Accessor<string>;
+  styles?(): string;
 
   declare shadowRoot: ShadowRoot;
 
@@ -18,7 +17,7 @@ export abstract class WillowElement extends HTMLElement {
     const root = this.attachShadow({ mode: "open" });
 
     if (this.styles) {
-      root.appendChild(h("style", null, this.styles));
+      root.appendChild(h("style", null, () => this.styles?.()));
     }
 
     const node = this.render();
