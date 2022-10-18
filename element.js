@@ -6,13 +6,15 @@ class WillowElement extends HTMLElement {
   constructor() {
     super();
     const root = this.attachShadow({ mode: "open" });
-    if (this.styles) {
-      root.appendChild(h("style", null, this.styles));
-    }
     const node = this.render();
     if (node) {
       root.appendChild(node);
     }
+    queueMicrotask(() => {
+      if (this.styles) {
+        root.appendChild(h("style", null, this.styles));
+      }
+    });
   }
   w = {};
   attribute(name, defaultValue) {

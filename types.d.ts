@@ -360,6 +360,7 @@ declare global {
             charSet?: ValueOrAccessor<string | undefined>;
             challenge?: ValueOrAccessor<string | undefined>;
             checked?: ValueOrAccessor<boolean | undefined>;
+            classID?: ValueOrAccessor<string | undefined>;
             className?: ValueOrAccessor<string | undefined>;
             class?: ValueOrAccessor<string | undefined>;
             cols?: ValueOrAccessor<number | undefined>;
