@@ -20,9 +20,7 @@ declare global {
       children: {};
     }
 
-    interface IntrinsicAttributes {
-      use?: Setter<Node>;
-    }
+    interface IntrinsicAttributes {}
 
     interface ElementTagNameMap {
       // HTML
