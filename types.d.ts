@@ -17,7 +17,6 @@ declare global {
             children: {};
         }
         interface IntrinsicAttributes {
-            use?: Setter<Node>;
         }
         interface ElementTagNameMap {
             a: HTMLAttributes<HTMLAnchorElement>;
