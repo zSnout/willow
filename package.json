@@ -15,6 +15,10 @@
     "dev": "tsc -w",
     "serve": "esbuild --servedir=./dist"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zSnout/willow"
+  },
   "author": "Zachary Sakowitz",
   "license": "GPL-3.0",
   "devDependencies": {
