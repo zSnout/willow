@@ -1,4 +1,8 @@
-# Web Components - 0.4.1 (October 18, 2022)
+# Repo Link - 0.4.8 (October 27, 2022)
+
+This version adds a link to the GitHub repo.
+
+# Web Components - 0.4.1 through 0.4.7 (October 18, 2022)
 
 The old WillowElement component has been removed. Instead, we have a new shadow
 DOM based component: WillowElement (v2)!
